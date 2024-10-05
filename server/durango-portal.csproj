@@ -2,17 +2,30 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <RootNamespace>durango_portal</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <CsWinRTComponent>true</CsWinRTComponent>
+    <CsWinRTWindowsMetadata>10.0.19041.0</CsWinRTWindowsMetadata>
+    <!-- Uncomment the line below to generate a log.txt in the obj folder -->
+    <!--<CsWinRTEnableLogging>true</CsWinRTEnableLogging>-->
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="../client/dist/**">
       <TargetPath>public/%(RecursiveDir)/%(Filename)%(Extension)</TargetPath>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.1.5" />
   </ItemGroup>
 
 </Project>
