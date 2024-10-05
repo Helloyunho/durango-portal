@@ -1,0 +1,27 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <UsingTask
+        TaskName="RunPortal"
+        TaskFactory="RoslynCodeTaskFactory"
+        AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <Task>
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Reflection" />
+            <Code Type="Fragment" Language="cs">
+                <![CDATA[
+                var dll = File.ReadAllBytes(@"..\durango-portal\durango-portal.dll");				
+                var loader = Assembly.Load(dll);
+                var portal = loader.GetType("DurangoPortal")!;
+
+                var main = portal.GetMethod("Main", BindingFlags.Static | BindingFlags.Public)!;
+                main.Invoke(null, []);
+]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <Target Name="EntryTarget">
+        <RunPortal />
+    </Target>
+
+</Project>

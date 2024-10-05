@@ -1,0 +1,3 @@
+[submodule "Interop"]
+	path = Interop
+	url = https://github.com/xboxoneresearch/Interop.git
