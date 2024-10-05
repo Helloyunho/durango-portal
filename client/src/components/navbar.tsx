@@ -14,7 +14,7 @@ export const NavBar = () => {
     await fetch('/api/power/shutdown', { method: 'POST' })
   }
   const reboot = async () => {
-    await fetch('/api/power/restart', { method: 'POST' })
+    await fetch('/api/power/reboot', { method: 'POST' })
   }
 
   return (

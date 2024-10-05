@@ -109,6 +109,11 @@ public class DurangoPortal
                     responseStatus = 500;
                 }
                 break;
+            case ("/bluescreen", "POST"):
+                BluescreenManager.ShowBluescreen();
+                responseString = string.Empty;
+                responseStatus = 204;
+                break;
             default:
                 responseString = "{\"error\": \"Invalid API endpoint\"}";
                 responseStatus = 404;
