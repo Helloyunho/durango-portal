@@ -1,44 +1,17 @@
-using System.Management;
+using System.Runtime.InteropServices;
 
 class PowerManager
 {
+    [DllImport("aygshell.dll", SetLastError = "true")]
+    private static extern bool ExitWindowsEx(uint dwFlags, uint dwReserved);
+
     public static void Shutdown()
     {
-        ManagementBaseObject mboShutdown = null;
-        ManagementClass mcWin32 = new ManagementClass("Win32_OperatingSystem");
-        mcWin32.Get();
-
-        // You can't shutdown without security privileges
-        mcWin32.Scope.Options.EnablePrivileges = true;
-        ManagementBaseObject mboShutdownParams =
-                mcWin32.GetMethodParameters("Win32Shutdown");
-
-        mboShutdownParams["Flags"] = "1";
-        mboShutdownParams["Reserved"] = "0";
-        foreach (ManagementObject manObj in mcWin32.GetInstances())
-        {
-            mboShutdown = manObj.InvokeMethod("Win32Shutdown",
-                                        mboShutdownParams, null);
-        }
+        ExitWindowsEx(0x00000001, 0);
     }
 
     public static void Reboot()
     {
-        ManagementBaseObject mboShutdown = null;
-        ManagementClass mcWin32 = new ManagementClass("Win32_OperatingSystem");
-        mcWin32.Get();
-
-        // You can't shutdown without security privileges
-        mcWin32.Scope.Options.EnablePrivileges = true;
-        ManagementBaseObject mboShutdownParams =
-                mcWin32.GetMethodParameters("Win32Shutdown");
-
-        mboShutdownParams["Flags"] = "2";
-        mboShutdownParams["Reserved"] = "0";
-        foreach (ManagementObject manObj in mcWin32.GetInstances())
-        {
-            mboShutdown = manObj.InvokeMethod("Win32Shutdown",
-                                        mboShutdownParams, null);
-        }
+        ExitWindowsEx(0x00000002, 0);
     }
 }
