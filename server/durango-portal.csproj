@@ -9,8 +9,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="../client/dist/**">
-      <Link>/public/%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>public/%(RecursiveDir)/%(Filename)%(Extension)</TargetPath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
   </ItemGroup>

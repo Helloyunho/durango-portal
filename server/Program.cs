@@ -68,6 +68,7 @@ public class DurangoPortal
             ".png" => "image/png",
             ".jpg" => "image/jpeg",
             ".gif" => "image/gif",
+            ".svg" => "image/svg+xml",
             _ => "application/octet-stream",
         };
     }
