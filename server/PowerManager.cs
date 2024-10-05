@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 class PowerManager
 {
-    [DllImport("aygshell.dll", SetLastError = "true")]
+    [DllImport("aygshell.dll", SetLastError = true)]
     private static extern bool ExitWindowsEx(uint dwFlags, uint dwReserved);
 
     public static void Shutdown()
