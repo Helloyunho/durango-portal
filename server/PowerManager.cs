@@ -2,6 +2,14 @@ using System.Runtime.InteropServices;
 
 class PowerManager
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    internal struct TokPriv1Luid
+    {
+        public int Count;
+        public long Luid;
+        public int Attr;
+    }
+
     [DllImport("kernel32.dll", ExactSpelling = true)]
     internal static extern IntPtr GetCurrentProcess();
 
