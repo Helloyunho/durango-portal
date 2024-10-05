@@ -14,5 +14,8 @@
       <Visible>false</Visible>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="8.0.0" />
+  </ItemGroup>
 
 </Project>
