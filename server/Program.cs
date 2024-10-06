@@ -1,14 +1,11 @@
-﻿// global using static System.Console;
-using System.Net;
-using System.Text;
-using System;
-using System.IO;
+﻿using System.Net;
+using System.Text.Json;
 using DurangoInteropDotnet;
 
 public class DurangoPortal
 {
     private static string baseDir = Path.Combine(AppContext.BaseDirectory, "public");
-    public static void Main()
+    public static async Task Main()
     {
         FirewallManager.DisableFirewalls();
         FirewallManager.AllowPortThroughFirewall("HTTP Portal", 24);
@@ -21,38 +18,43 @@ public class DurangoPortal
 
         while (true)
         {
-            HttpListenerContext context = listener.GetContext();
-            HttpListenerRequest request = context.Request;
-            HttpListenerResponse response = context.Response;
-
-            string urlPath = request.Url.AbsolutePath.TrimStart('/');
-
-            // If no specific file is requested, serve index.html
-            if (string.IsNullOrEmpty(urlPath))
-            {
-                urlPath = "index.html";
-            }
-            else if (urlPath.StartsWith("api/"))
-            {
-                // Handle API requests
-                HandleApiRequest(urlPath, request, response);
-                continue;
-            }
-
-            // Build the full file path
-            string filePath = Path.Combine(baseDir, urlPath);
-
-            if (!File.Exists(filePath))
-            {
-                filePath = Path.Combine(baseDir, "index.html");
-            }
-
-            byte[] buffer = File.ReadAllBytes(filePath);
-            response.ContentType = GetContentType(filePath);
-            response.ContentLength64 = buffer.Length;
-            response.OutputStream.Write(buffer, 0, buffer.Length);
-            response.OutputStream.Close();
+            HttpListenerContext context = await listener.GetContextAsync();
+            _ = HandleRequest(context);
         }
+    }
+
+    private static async Task HandleRequest(HttpListenerContext context)
+    {
+        HttpListenerRequest request = context.Request;
+        HttpListenerResponse response = context.Response;
+
+        string? urlPath = request.Url?.AbsolutePath.TrimStart('/');
+
+        // If no specific file is requested, serve index.html
+        if (string.IsNullOrEmpty(urlPath))
+        {
+            urlPath = "index.html";
+        }
+        else if (urlPath.StartsWith("api/"))
+        {
+            // Handle API requests
+            await HandleApiRequest(urlPath, request, response);
+            return;
+        }
+
+        // Build the full file path
+        string filePath = Path.Combine(baseDir, urlPath);
+
+        if (!File.Exists(filePath))
+        {
+            filePath = Path.Combine(baseDir, "index.html");
+        }
+
+        byte[] buffer = await File.ReadAllBytesAsync(filePath);
+        response.ContentType = GetContentType(filePath);
+        response.ContentLength64 = buffer.Length;
+        await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+        response.OutputStream.Close();
     }
 
     private static string GetContentType(string filePath)
@@ -71,53 +73,137 @@ public class DurangoPortal
         };
     }
 
-    private static void HandleApiRequest(string urlPath, HttpListenerRequest request, HttpListenerResponse response)
+    private static async Task<string> ReadTextAsync(HttpListenerRequest request)
     {
-        string responseString = string.Empty;
+        using StreamReader reader = new StreamReader(request.InputStream, request.ContentEncoding);
+        string text = await reader.ReadToEndAsync();
+        return text;
+    }
+
+    private static async Task<T?> ReadJsonAsync<T>(HttpListenerRequest request)
+    {
+        return await JsonSerializer.DeserializeAsync<T>(request.InputStream, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+    }
+
+    private static string SerializeToJson<T>(T obj)
+    {
+        return JsonSerializer.Serialize<T>(obj, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+    }
+
+    private static async Task HandleApiRequest(string urlPath, HttpListenerRequest request, HttpListenerResponse response)
+    {
         int responseStatus = 200;
-        string url = urlPath.Substring(3);
-        if (url.EndsWith("/"))
+        string url = urlPath[3..];
+        if (url.EndsWith('/'))
         {
-            url = url.Substring(0, url.Length - 1);
+            url = url[..^1];
         }
 
+        string responseString;
         switch ((url, request.HttpMethod))
         {
             case ("/power/shutdown", "POST"):
-                try
                 {
-                    PowerManager.Shutdown();
-                    responseString = string.Empty;
-                    responseStatus = 204;
+                    try
+                    {
+                        PowerManager.Shutdown();
+                        responseString = string.Empty;
+                        responseStatus = 204;
+                    }
+                    catch (Exception e)
+                    {
+                        ErrorContainer error = new ErrorContainer { Error = e.Message };
+                        responseString = SerializeToJson(error);
+                        responseStatus = 500;
+                    }
+                    break;
                 }
-                catch (Exception e)
-                {
-                    responseString = "{\"error\": \"" + e.Message + "\"}";
-                    responseStatus = 500;
-                }
-                break;
             case ("/power/reboot", "POST"):
-                try
                 {
-                    PowerManager.Reboot();
-                    responseString = string.Empty;
-                    responseStatus = 204;
+                    try
+                    {
+                        PowerManager.Reboot();
+                        responseString = string.Empty;
+                        responseStatus = 204;
+                    }
+                    catch (Exception e)
+                    {
+                        ErrorContainer error = new ErrorContainer { Error = e.Message };
+                        responseString = SerializeToJson(error);
+                        responseStatus = 500;
+                    }
+                    break;
                 }
-                catch (Exception e)
-                {
-                    responseString = "{\"error\": \"" + e.Message + "\"}";
-                    responseStatus = 500;
-                }
-                break;
             case ("/bluescreen", "POST"):
                 BluescreenManager.ShowBluescreen();
                 responseString = string.Empty;
                 responseStatus = 204;
                 break;
+            case ("/process", "GET"):
+                {
+                    var processes = ProcessManager.GetProcesses();
+                    responseString = SerializeToJson(processes);
+                    break;
+                }
+            case ("/process", "DELETE"):
+                {
+                    if (request.QueryString.Count == 0)
+                    {
+                        ErrorContainer error = new ErrorContainer { Error = "Invalid request" };
+                        responseString = SerializeToJson(error);
+                        responseStatus = 400;
+                        break;
+                    }
+                    string? id = request.QueryString["id"];
+                    if (int.TryParse(id, out int processId))
+                    {
+                        try
+                        {
+                            ProcessManager.KillProcess(processId);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        catch (Exception e)
+                        {
+                            ErrorContainer error = new ErrorContainer { Error = e.Message };
+                            responseString = SerializeToJson(error);
+                            responseStatus = 500;
+                        }
+                    }
+                    else
+                    {
+                        string? name = request.QueryString["name"];
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            try
+                            {
+                                ProcessManager.KillProcess(name);
+                                responseString = string.Empty;
+                                responseStatus = 204;
+                            }
+                            catch (Exception e)
+                            {
+                                ErrorContainer error = new ErrorContainer { Error = e.Message };
+                                responseString = SerializeToJson(error);
+                                responseStatus = 500;
+                            }
+                        }
+                        else
+                        {
+                            ErrorContainer error = new ErrorContainer { Error = "Invalid request" };
+                            responseString = SerializeToJson(error);
+                            responseStatus = 400;
+                        }
+                    }
+                    break;
+                }
             default:
-                responseString = "{\"error\": \"Invalid API endpoint\"}";
-                responseStatus = 404;
-                break;
+                {
+                    ErrorContainer error = new ErrorContainer { Error = "Not Found" };
+                    responseString = SerializeToJson(error);
+                    responseStatus = 404;
+                    break;
+                }
         }
 
         byte[] buffer = Encoding.UTF8.GetBytes(responseString);
@@ -131,7 +217,7 @@ public class DurangoPortal
             response.ContentLength64 = buffer.Length;
         }
         response.StatusCode = responseStatus;
-        response.OutputStream.Write(buffer, 0, buffer.Length);
+        await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
         response.OutputStream.Close();
     }
 }
