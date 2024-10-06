@@ -147,13 +147,6 @@ public class DurangoPortal
                 }
             case ("/process", "DELETE"):
                 {
-                    if (request.QueryString.Count == 0)
-                    {
-                        ErrorContainer error = new ErrorContainer { Error = "Invalid request" };
-                        responseString = SerializeToJson(error);
-                        responseStatus = 400;
-                        break;
-                    }
                     string? id = request.QueryString["id"];
                     if (int.TryParse(id, out int processId))
                     {
@@ -194,6 +187,38 @@ public class DurangoPortal
                             responseString = SerializeToJson(error);
                             responseStatus = 400;
                         }
+                    }
+                    break;
+                }
+            case ("/app", "GET"):
+                {
+                    var apps = AppManager.GetInstalledApps();
+                    responseString = SerializeToJson(apps);
+                    break;
+                }
+            case ("/app", "DELETE"):
+                {
+                    string? id = request.QueryString["id"];
+                    if (!string.IsNullOrEmpty(id))
+                    {
+                        try
+                        {
+                            AppManager.RemoveApp(id);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        catch (Exception e)
+                        {
+                            ErrorContainer error = new ErrorContainer { Error = e.Message };
+                            responseString = SerializeToJson(error);
+                            responseStatus = 500;
+                        }
+                    }
+                    else
+                    {
+                        ErrorContainer error = new ErrorContainer { Error = "Invalid request" };
+                        responseString = SerializeToJson(error);
+                        responseStatus = 400;
                     }
                     break;
                 }
