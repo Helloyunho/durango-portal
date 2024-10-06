@@ -27,6 +27,8 @@ class AppManager
         {
             process.StartInfo.FileName = "MinDeployAppx.exe";
             process.StartInfo.Arguments = $"/Remove /PackageFullName:{package}";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
             process.Start();
             process.WaitForExit();
             if (process.ExitCode != 0)
