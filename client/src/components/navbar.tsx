@@ -7,14 +7,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { useToast } from '@/hooks/use-toast'
 import { Power, RotateCcw } from 'lucide-react'
 
 export const NavBar = () => {
+  const { toast } = useToast()
   const shutdown = async () => {
-    await fetch('/api/power/shutdown', { method: 'POST' })
+    try {
+      const resp = await fetch('/api/power/shutdown', { method: 'POST' })
+      if (!resp.ok) {
+        throw new Error(`${resp.status} ${resp.statusText}`)
+      }
+    } catch (err) {
+      toast({
+        title: 'Error!',
+        description: `Failed to shutdown: ${err}`,
+        variant: 'destructive'
+      })
+    }
   }
   const reboot = async () => {
-    await fetch('/api/power/reboot', { method: 'POST' })
+    try {
+      const resp = await fetch('/api/power/reboot', { method: 'POST' })
+      if (!resp.ok) {
+        throw new Error(`${resp.status} ${resp.statusText}`)
+      }
+    } catch (err) {
+      toast({
+        title: 'Error!',
+        description: `Failed to reboot: ${err}`,
+        variant: 'destructive'
+      })
+    }
   }
 
   return (
