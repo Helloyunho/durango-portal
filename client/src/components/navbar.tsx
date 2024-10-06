@@ -54,6 +54,9 @@ export const NavBar = () => {
       <Button variant='ghost' asChild>
         <Link to='/taskmgr'>Task Manager</Link>
       </Button>
+      <Button variant='ghost' asChild>
+        <Link to='/app'>App Management</Link>
+      </Button>
       <div className='ml-auto flex gap-4'>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
