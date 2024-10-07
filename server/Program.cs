@@ -2,6 +2,7 @@
 using System.Text.Json;
 using DurangoInteropDotnet;
 using System.CodeDom.Compiler;
+using System.Text;
 
 public class DurangoPortal
 {
