@@ -32,6 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <SupportedPlatform Include="Windows" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.1.5" />
     <PackageReference Include="System.CodeDom" Version="8.0.0" />
   </ItemGroup>

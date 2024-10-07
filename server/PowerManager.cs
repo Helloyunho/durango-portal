@@ -1,14 +1,14 @@
-using Windows.System;
+using Windows.Xbox.System.Internal.Power;
 
 class PowerManager
 {
     public static void Shutdown()
     {
-        ShutdownManager.BeginShutdown(ShutdownKind.Shutdown, new TimeSpan(0));
+        PowerProperties.ShutDownConsole();
     }
 
     public static void Reboot()
     {
-        ShutdownManager.BeginShutdown(ShutdownKind.Restart, new TimeSpan(0));
+        PowerProperties.RestartConsole();
     }
 }
