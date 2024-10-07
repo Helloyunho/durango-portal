@@ -7,7 +7,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <CsWinRTPrivateProjection>true</CsWinRTPrivateProjection>
+    <CsWinRTIncludesPrivate>
+      Windows.Xbox.System.Internal.Power.PowerProperties;
+      Windows.Xbox.System.Internal.Power.PowerChimeMode;
+      Windows.Xbox.System.Internal.Power.IPowerPropertiesStatics;
+      Windows.Xbox.Shell.SettingsContract
+    </CsWinRTIncludesPrivate>
+    <CsWinRTGeneratedFilesDir>$(OutDir)</CsWinRTGeneratedFilesDir>
   </PropertyGroup>
+
+  <ItemGroup>
+    <CsWinRTInputs Include="winmd\Windows.Xbox.winmd" />
+    <Content Include="winmd\Windows.Xbox.winmd" Link="Windows.Xbox.winmd" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="../client/dist/**">
@@ -15,6 +28,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Visible>false</Visible>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.1.5" />
+    <PackageReference Include="System.CodeDom" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

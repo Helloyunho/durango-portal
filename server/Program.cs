@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 using DurangoInteropDotnet;
+using System.CodeDom.Compiler;
 
 public class DurangoPortal
 {
@@ -78,6 +79,13 @@ public class DurangoPortal
         using StreamReader reader = new StreamReader(request.InputStream, request.ContentEncoding);
         string text = await reader.ReadToEndAsync();
         return text;
+    }
+
+    private static async Task<byte[]> ReadBytesAsync(HttpListenerRequest request)
+    {
+        using MemoryStream ms = new MemoryStream();
+        await request.InputStream.CopyToAsync(ms);
+        return ms.ToArray();
     }
 
     private static async Task<T?> ReadJsonAsync<T>(HttpListenerRequest request)
@@ -219,6 +227,54 @@ public class DurangoPortal
                         ErrorContainer error = new ErrorContainer { Error = "Invalid request" };
                         responseString = SerializeToJson(error);
                         responseStatus = 400;
+                    }
+                    break;
+                }
+            case ("/app", "POST"):
+                {
+                    using (var tempFiles = new TempFileCollection())
+                    {
+                        string file = tempFiles.AddExtension("eappx");
+                        using (FileStream? fs = new FileStream(file, FileMode.Create, FileAccess.Write))
+                        {
+                            await request.InputStream.CopyToAsync(fs);
+                        }
+                        try
+                        {
+                            AppManager.InstallApp(file);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        catch (Exception e)
+                        {
+                            ErrorContainer error = new ErrorContainer { Error = e.Message };
+                            responseString = SerializeToJson(error);
+                            responseStatus = 500;
+                        }
+                    }
+                    break;
+                }
+            case ("/app/cert", "POST"):
+                {
+                    using (var tempFiles = new TempFileCollection())
+                    {
+                        string file = tempFiles.AddExtension("cer");
+                        using (FileStream? fs = new FileStream(file, FileMode.Create, FileAccess.Write))
+                        {
+                            await request.InputStream.CopyToAsync(fs);
+                        }
+                        try
+                        {
+                            AppManager.InstallCert(file);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        catch (Exception e)
+                        {
+                            ErrorContainer error = new ErrorContainer { Error = e.Message };
+                            responseString = SerializeToJson(error);
+                            responseStatus = 500;
+                        }
                     }
                     break;
                 }
