@@ -1,26 +1,42 @@
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32;
+using Windows.ApplicationModel;
+using Windows.Management.Deployment;
+
+class PackageContainer
+{
+    public string Name { get; set; }
+    public string Id { get; set; }
+
+    public PackageContainer(Package package)
+    {
+        Name = package.DisplayName;
+        Id = package.Id.FullName;
+    }
+}
 
 class AppManager
 {
-    public static string[] GetInstalledApps()
+    public static PackageContainer[] GetInstalledApps()
     {
-        using (Process process = new Process())
-        {
-            process.StartInfo.FileName = "MinDeployAppx.exe";
-            process.StartInfo.Arguments = "/GetPackages";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-            if (process.ExitCode != 0)
-            {
-                throw new Exception($"Failed to get installed apps: {process.ExitCode}");
-            }
-            return output.Split('\n', StringSplitOptions.RemoveEmptyEntries)[..^1].Select(line => line.Trim()).ToArray();
-        }
+        PackageManager packageManager = new PackageManager();
+        return packageManager.FindPackages().Select(package => new PackageContainer(package)).ToArray();
+        // using (Process process = new Process())
+        // {
+        //     process.StartInfo.FileName = "MinDeployAppx.exe";
+        //     process.StartInfo.Arguments = "/GetPackages";
+        //     process.StartInfo.UseShellExecute = false;
+        //     process.StartInfo.RedirectStandardOutput = true;
+        //     process.Start();
+        //     string output = process.StandardOutput.ReadToEnd();
+        //     process.WaitForExit();
+        //     if (process.ExitCode != 0)
+        //     {
+        //         throw new Exception($"Failed to get installed apps: {process.ExitCode}");
+        //     }
+        //     return output.Split('\n', StringSplitOptions.RemoveEmptyEntries)[..^1].Select(line => line.Trim()).ToArray();
+        // }
     }
 
     public static void RemoveApp(string package)
