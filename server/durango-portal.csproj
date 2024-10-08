@@ -12,6 +12,8 @@
       Windows.Xbox.System.Internal.Power.PowerProperties;
       Windows.Xbox.System.Internal.Power.PowerChimeMode;
       Windows.Xbox.System.Internal.Power.IPowerPropertiesStatics;
+      Windows.Xbox.System.Internal.Power.IPowerPropertiesStaticsMethods;
+      Windows.Xbox.System.Internal.Power.AdjustedActiveHourMode;
       Windows.Xbox.Shell.SettingsContract
     </CsWinRTIncludesPrivate>
     <CsWinRTGeneratedFilesDir>$(OutDir)</CsWinRTGeneratedFilesDir>
