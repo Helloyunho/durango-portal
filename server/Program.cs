@@ -121,7 +121,7 @@ public class DurangoPortal
                     }
                     catch (Exception e)
                     {
-                        ErrorContainer error = new ErrorContainer { Error = e.Message };
+                        ErrorContainer error = new ErrorContainer(e);
                         responseString = SerializeToJson(error);
                         responseStatus = 500;
                     }
@@ -137,7 +137,7 @@ public class DurangoPortal
                     }
                     catch (Exception e)
                     {
-                        ErrorContainer error = new ErrorContainer { Error = e.Message };
+                        ErrorContainer error = new ErrorContainer(e);
                         responseString = SerializeToJson(error);
                         responseStatus = 500;
                     }
@@ -167,7 +167,7 @@ public class DurangoPortal
                         }
                         catch (Exception e)
                         {
-                            ErrorContainer error = new ErrorContainer { Error = e.Message };
+                            ErrorContainer error = new ErrorContainer(e);
                             responseString = SerializeToJson(error);
                             responseStatus = 500;
                         }
@@ -185,14 +185,14 @@ public class DurangoPortal
                             }
                             catch (Exception e)
                             {
-                                ErrorContainer error = new ErrorContainer { Error = e.Message };
+                                ErrorContainer error = new ErrorContainer(e);
                                 responseString = SerializeToJson(error);
                                 responseStatus = 500;
                             }
                         }
                         else
                         {
-                            ErrorContainer error = new ErrorContainer { Error = "Invalid request" };
+                            ErrorContainer error = new ErrorContainer("Invalid request");
                             responseString = SerializeToJson(error);
                             responseStatus = 400;
                         }
@@ -218,14 +218,14 @@ public class DurangoPortal
                         }
                         catch (Exception e)
                         {
-                            ErrorContainer error = new ErrorContainer { Error = e.Message };
+                            ErrorContainer error = new ErrorContainer(e);
                             responseString = SerializeToJson(error);
                             responseStatus = 500;
                         }
                     }
                     else
                     {
-                        ErrorContainer error = new ErrorContainer { Error = "Invalid request" };
+                        ErrorContainer error = new ErrorContainer("Invalid request");
                         responseString = SerializeToJson(error);
                         responseStatus = 400;
                     }
@@ -248,7 +248,7 @@ public class DurangoPortal
                         }
                         catch (Exception e)
                         {
-                            ErrorContainer error = new ErrorContainer { Error = e.Message };
+                            ErrorContainer error = new ErrorContainer(e);
                             responseString = SerializeToJson(error);
                             responseStatus = 500;
                         }
@@ -272,7 +272,7 @@ public class DurangoPortal
                         }
                         catch (Exception e)
                         {
-                            ErrorContainer error = new ErrorContainer { Error = e.Message };
+                            ErrorContainer error = new ErrorContainer(e);
                             responseString = SerializeToJson(error);
                             responseStatus = 500;
                         }
@@ -281,7 +281,7 @@ public class DurangoPortal
                 }
             default:
                 {
-                    ErrorContainer error = new ErrorContainer { Error = "Not Found" };
+                    ErrorContainer error = new ErrorContainer("Not Found");
                     responseString = SerializeToJson(error);
                     responseStatus = 404;
                     break;
