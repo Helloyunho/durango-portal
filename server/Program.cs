@@ -122,6 +122,7 @@ public class DurangoPortal
                     catch (Exception e)
                     {
                         ErrorContainer error = new ErrorContainer(e);
+                        Console.WriteLine(e.ToString());
                         responseString = SerializeToJson(error);
                         responseStatus = 500;
                     }
@@ -138,6 +139,7 @@ public class DurangoPortal
                     catch (Exception e)
                     {
                         ErrorContainer error = new ErrorContainer(e);
+                        Console.WriteLine(e.ToString());
                         responseString = SerializeToJson(error);
                         responseStatus = 500;
                     }
@@ -168,6 +170,7 @@ public class DurangoPortal
                         catch (Exception e)
                         {
                             ErrorContainer error = new ErrorContainer(e);
+                            Console.WriteLine(e.ToString());
                             responseString = SerializeToJson(error);
                             responseStatus = 500;
                         }
@@ -186,6 +189,7 @@ public class DurangoPortal
                             catch (Exception e)
                             {
                                 ErrorContainer error = new ErrorContainer(e);
+                                Console.WriteLine(e.ToString());
                                 responseString = SerializeToJson(error);
                                 responseStatus = 500;
                             }
@@ -219,6 +223,7 @@ public class DurangoPortal
                         catch (Exception e)
                         {
                             ErrorContainer error = new ErrorContainer(e);
+                            Console.WriteLine(e.ToString());
                             responseString = SerializeToJson(error);
                             responseStatus = 500;
                         }
@@ -249,6 +254,7 @@ public class DurangoPortal
                         catch (Exception e)
                         {
                             ErrorContainer error = new ErrorContainer(e);
+                            Console.WriteLine(e.ToString());
                             responseString = SerializeToJson(error);
                             responseStatus = 500;
                         }
@@ -273,6 +279,7 @@ public class DurangoPortal
                         catch (Exception e)
                         {
                             ErrorContainer error = new ErrorContainer(e);
+                            Console.WriteLine(e.ToString());
                             responseString = SerializeToJson(error);
                             responseStatus = 500;
                         }
