@@ -212,7 +212,7 @@ public class DurangoPortal
                     {
                         try
                         {
-                            AppManager.RemoveApp(id);
+                            await AppManager.RemoveApp(id);
                             responseString = string.Empty;
                             responseStatus = 204;
                         }
@@ -242,7 +242,7 @@ public class DurangoPortal
                         }
                         try
                         {
-                            AppManager.InstallApp(file);
+                            await AppManager.InstallApp(file);
                             responseString = string.Empty;
                             responseStatus = 204;
                         }
