@@ -42,11 +42,16 @@ class AppManager
 
     public static async Task InstallApp(string path)
     {
-        RegistryKey HKLM = Registry.LocalMachine;
-        HKLM.SetValue(@"SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
-        HKLM.SetValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
-        HKLM.SetValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 4, RegistryValueKind.DWord);
+        using (RegistryKey HKLM = Registry.LocalMachine)
+        {
+            HKLM.SetValue(@"SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
+            HKLM.SetValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
+            HKLM.SetValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 4, RegistryValueKind.DWord);
+        }
+        var pathUri = new Uri(path);
 
-        await packageManager.AddPackageAsync(new Uri(path), [], DeploymentOptions.None).AsTask();
+        await packageManager.StagePackageAsync(pathUri, null, DeploymentOptions.None).AsTask();
+        await packageManager.RegisterPackageAsync(pathUri, null, DeploymentOptions.None).AsTask();
+        await packageManager.AddPackageAsync(pathUri, null, DeploymentOptions.None).AsTask();
     }
 }
