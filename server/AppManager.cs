@@ -47,6 +47,6 @@ class AppManager
         HKLM.SetValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
         HKLM.SetValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 4, RegistryValueKind.DWord);
 
-        await packageManager.AddPackageAsync(new Uri(path), null, DeploymentOptions.None);
+        await packageManager.AddPackageAsync(new Uri(path), null, DeploymentOptions.None).AsTask();
     }
 }
