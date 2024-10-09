@@ -50,8 +50,6 @@ class AppManager
         }
         var pathUri = new Uri(path);
 
-        await packageManager.StagePackageAsync(pathUri, null, DeploymentOptions.None).AsTask();
-        await packageManager.RegisterPackageAsync(pathUri, null, DeploymentOptions.None).AsTask();
         await packageManager.AddPackageAsync(pathUri, null, DeploymentOptions.None).AsTask();
     }
 }
