@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { useToast } from '@/hooks/use-toast'
+import type { ErrorContainer } from '@/types/error'
 import { Power, RotateCcw } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -17,8 +18,8 @@ export const NavBar = () => {
     try {
       const resp = await fetch('/api/power/shutdown', { method: 'POST' })
       if (!resp.ok) {
-        const { error }: { error: string } = await resp.json()
-        throw new Error(error)
+        const { message, stackTrace }: ErrorContainer = await resp.json()
+        throw new Error(`${message}: ${stackTrace}`)
       }
     } catch (err) {
       toast({
@@ -32,8 +33,8 @@ export const NavBar = () => {
     try {
       const resp = await fetch('/api/power/reboot', { method: 'POST' })
       if (!resp.ok) {
-        const { error }: { error: string } = await resp.json()
-        throw new Error(error)
+        const { message, stackTrace }: ErrorContainer = await resp.json()
+        throw new Error(`${message}: ${stackTrace}`)
       }
     } catch (err) {
       toast({
@@ -55,7 +56,7 @@ export const NavBar = () => {
         <Link to='/taskmgr'>Task Manager</Link>
       </Button>
       <Button variant='ghost' asChild>
-        <Link to='/app'>App Management</Link>
+        <Link to='/package'>Package Management</Link>
       </Button>
       <div className='ml-auto flex gap-4'>
         <DropdownMenu>

@@ -21,23 +21,24 @@ import {
 
 import { useToast } from '@/hooks/use-toast'
 import { useSWRFetcher } from '@/lib/swr-fetcher'
-import type { Process } from '@/types/process'
-import { Loader2, X, LogOut } from 'lucide-react'
+import { Loader2, Trash, X } from 'lucide-react'
+import type { Package } from '@/types/package'
+import { PackageInstallButton } from '@/components/app-install-button'
 import type { ErrorContainer } from '@/types/error'
 
-export const TaskMgr = () => {
+export const PackageManagement = () => {
   const { toast } = useToast()
-  const { isLoading, data, error } = useSWRFetcher<Process[]>(
-    '/api/process',
+  const { isLoading, data, error } = useSWRFetcher<Package[]>(
+    '/api/app',
     undefined,
     {
-      refreshInterval: 1000
+      refreshInterval: 10000
     }
   )
 
-  const kill = async (pid: number) => {
+  const removeApp = async (id: string) => {
     try {
-      const resp = await fetch(`/api/process?id=${pid}`, { method: 'DELETE' })
+      const resp = await fetch(`/api/app?id=${id}`, { method: 'DELETE' })
       if (!resp.ok) {
         const { message, stackTrace }: ErrorContainer = await resp.json()
         throw new Error(`${message}: ${stackTrace}`)
@@ -45,7 +46,7 @@ export const TaskMgr = () => {
     } catch (err) {
       toast({
         title: 'Error!',
-        description: `Failed to kill process: ${err}`,
+        description: `Failed to remove package: ${err}`,
         variant: 'destructive'
       })
     }
@@ -57,35 +58,34 @@ export const TaskMgr = () => {
         <Loader2 className='animate-spin h-8 w-8' />
       ) : error ? null : (
         <>
-          <h2 className='text-3xl font-semibold'>Task Manager</h2>
+          <div className='flex justify-between w-full'>
+            <h2 className='text-3xl font-semibold'>Package Management</h2>
+            <PackageInstallButton />
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className='w-[100px]'>ID</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead className='text-right'>Mem (MB)</TableHead>
-                <TableHead className='text-right'>Status</TableHead>
                 <TableHead className='text-right'>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data
-                ?.sort((a, b) => a.id - b.id)
-                .map(({ id, name, memory, responding }) => (
+                ?.sort((a, b) => {
+                  if (a.name < b.name) return -1
+                  if (a.name > b.name) return 1
+                  return 0
+                })
+                .map(({ id, name }) => (
                   <TableRow key={id}>
                     <TableCell className='font-medium'>{id}</TableCell>
                     <TableCell>{name}</TableCell>
                     <TableCell className='text-right'>
-                      {(memory / 1024 / 1024).toFixed(2)}
-                    </TableCell>
-                    <TableCell className='text-right'>
-                      {responding ? 'Running' : 'Not Responding'}
-                    </TableCell>
-                    <TableCell className='text-right'>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant='destructive' size='icon'>
-                            <LogOut className='h-4 w-4' />
+                            <Trash className='h-4 w-4' />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -94,9 +94,8 @@ export const TaskMgr = () => {
                               Are you absolutely sure?
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will kill{' '}
-                              {name}
-                              (pid: {id}).
+                              This action cannot be undone. This will remove
+                              package {id}.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -105,11 +104,11 @@ export const TaskMgr = () => {
                               Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => kill(id)}
+                              onClick={() => removeApp(id)}
                               className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
                             >
-                              <LogOut className='w-4 h-4 mr-2' />
-                              Kill
+                              <Trash className='w-4 h-4 mr-2' />
+                              Remove
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

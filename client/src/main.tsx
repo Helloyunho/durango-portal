@@ -6,7 +6,7 @@ import { TaskMgr } from './pages/taskmgr'
 import { Toaster } from '@/components/ui/toaster'
 import './index.css'
 import { Index } from './pages'
-import { AppManagement } from './pages/app'
+import { PackageManagement } from './pages/package'
 
 const router = createBrowserRouter([
   {
@@ -22,8 +22,8 @@ const router = createBrowserRouter([
         element: <TaskMgr />
       },
       {
-        path: 'app',
-        element: <AppManagement />
+        path: 'package',
+        element: <PackageManagement />
       }
     ]
   }
