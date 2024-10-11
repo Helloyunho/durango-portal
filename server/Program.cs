@@ -101,10 +101,13 @@ public class DurangoPortal
 
     private static string GetTempFilePath(string extension)
     {
-        string tempPath = Path.GetTempPath();
-        string fileName = Path.GetRandomFileName();
-        string filePath = Path.Combine(tempPath, fileName + extension);
-        return filePath;
+        string tempDir = Path.Combine(AppContext.BaseDirectory, "tmp");
+        if (!Directory.Exists(tempDir))
+        {
+            Directory.CreateDirectory(tempDir);
+        }
+        string fileName = Path.GetRandomFileName() + extension;
+        return Path.Combine(tempDir, fileName);
     }
 
     private static async Task HandleApiRequest(string urlPath, HttpListenerRequest request, HttpListenerResponse response)
@@ -276,26 +279,23 @@ public class DurangoPortal
                 }
             case ("/app/cert", "POST"):
                 {
-                    using (var tempFiles = new TempFileCollection())
+                    string certPath = GetTempFilePath(".cer");
+                    using (FileStream? fs = new FileStream(certPath, FileMode.Create, FileAccess.Write))
                     {
-                        string file = tempFiles.AddExtension("cer");
-                        using (FileStream? fs = new FileStream(file, FileMode.Create, FileAccess.Write))
-                        {
-                            await request.InputStream.CopyToAsync(fs);
-                        }
-                        try
-                        {
-                            AppManager.InstallCert(file);
-                            responseString = string.Empty;
-                            responseStatus = 204;
-                        }
-                        catch (Exception e)
-                        {
-                            ErrorContainer error = new ErrorContainer(e);
-                            Console.WriteLine(e.ToString());
-                            responseString = SerializeToJson(error);
-                            responseStatus = 500;
-                        }
+                        await request.InputStream.CopyToAsync(fs);
+                    }
+                    try
+                    {
+                        AppManager.InstallCert(certPath);
+                        responseString = string.Empty;
+                        responseStatus = 204;
+                    }
+                    catch (Exception e)
+                    {
+                        ErrorContainer error = new ErrorContainer(e);
+                        Console.WriteLine(e.ToString());
+                        responseString = SerializeToJson(error);
+                        responseStatus = 500;
                     }
                     break;
                 }
