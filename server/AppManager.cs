@@ -79,6 +79,7 @@ class AppManager
             SetRegistryValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
             SetRegistryValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowAllTrustedApps", 1, RegistryValueKind.DWord);
             SetRegistryValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 1, RegistryValueKind.DWord);
+            SetRegistryValue(@"OSDATA\Cloud Settings Cache\7E27AE37-A2D1-423E-ACD2-8D3357F894C9", 1, RegistryValueKind.DWord);
         }
     }
 
