@@ -227,7 +227,8 @@ public class DurangoPortal
                     {
                         try
                         {
-                            await AppManager.RemoveApp(id);
+                            // await AppManager.RemoveApp(id);
+                            AppManager.RemoveApp(id);
                             responseString = string.Empty;
                             responseStatus = 204;
                         }

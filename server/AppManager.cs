@@ -25,9 +25,25 @@ class AppManager
         return packageManager.FindPackages().Select(package => new PackageContainer(package)).ToArray();
     }
 
-    public static async Task RemoveApp(string package)
+    // public static async Task RemoveApp(string package)
+    public static void RemoveApp(string package)
     {
-        await packageManager.RemovePackageAsync(package).AsTask();
+        // this also doesnt work yet
+        // await packageManager.RemovePackageAsync(package).AsTask();
+
+        using (Process process = new Process())
+        {
+            process.StartInfo.FileName = "MinDeployAppx.exe";
+            process.StartInfo.Arguments = $"/Remove /PackageFullName:{package}";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.Start();
+            process.WaitForExit();
+            if (process.ExitCode != 0)
+            {
+                throw new Exception($"Failed to remove package: {process.ExitCode}");
+            }
+        }
     }
 
     public static void InstallCert(string path)
@@ -64,7 +80,7 @@ class AppManager
             process.WaitForExit();
             if (process.ExitCode != 0)
             {
-                throw new Exception($"Failed to install app: {process.ExitCode}");
+                throw new Exception($"Failed to install package: {process.ExitCode}");
             }
         }
     }
