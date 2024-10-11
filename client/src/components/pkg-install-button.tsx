@@ -70,7 +70,7 @@ export const PackageInstallButton = () => {
     } catch (err) {
       toast({
         title: 'Error!',
-        description: `Failed to install app: ${err}`,
+        description: `Failed to install package: ${err}`,
         variant: 'destructive'
       })
       throw err
@@ -94,10 +94,10 @@ export const PackageInstallButton = () => {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Install App</DialogTitle>
+          <DialogTitle>Install Package</DialogTitle>
           <DialogDescription>
-            Install an app with an encrypted package(.eappx) and optional
-            certificate(.cer)
+            Install a package with an encrypted package file(.eappx) and
+            optional certificate file(.p7x)
           </DialogDescription>
         </DialogHeader>
         <Form {...packageInstallForm}>

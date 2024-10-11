@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useSWRFetcher } from '@/lib/swr-fetcher'
 import { Loader2, Trash, X } from 'lucide-react'
 import type { Package } from '@/types/package'
-import { PackageInstallButton } from '@/components/app-install-button'
+import { PackageInstallButton } from '@/components/pkg-install-button'
 import type { ErrorContainer } from '@/types/error'
 
 export const PackageManagement = () => {
