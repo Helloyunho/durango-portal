@@ -73,7 +73,7 @@ class AppManager
         using (Process process = new Process())
         {
             process.StartInfo.FileName = "MinDeployAppx.exe";
-            process.StartInfo.Arguments = $"/Add /PackagePath:\"{path}\"";
+            process.StartInfo.Arguments = $"/Add /PackagePath:\"{path}\" /DeploymentOption:0x00808000";
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.Start();
