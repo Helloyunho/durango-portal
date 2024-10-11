@@ -298,6 +298,13 @@ public class DurangoPortal
                         responseString = SerializeToJson(error);
                         responseStatus = 500;
                     }
+                    finally
+                    {
+                        if (File.Exists(certPath))
+                        {
+                            File.Delete(certPath);
+                        }
+                    }
                     break;
                 }
             default:
