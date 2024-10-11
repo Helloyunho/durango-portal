@@ -256,8 +256,8 @@ public class DurangoPortal
                     }
                     try
                     {
-                        await AppManager.InstallApp(filePath);
-                        // AppManager.InstallApp(filePath);
+                        // await AppManager.InstallApp(filePath);
+                        AppManager.InstallApp(filePath);
                         responseString = string.Empty;
                         responseStatus = 204;
                     }
