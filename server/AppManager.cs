@@ -63,7 +63,7 @@ class AppManager
         {
             HKLM.SetValue(@"SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
             HKLM.SetValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
-            HKLM.SetValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 4, RegistryValueKind.DWord);
+            HKLM.SetValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 1, RegistryValueKind.DWord);
         }
         // Temporarily disable these codes until I find other way to install appx
         // var pathUri = new Uri(path);
