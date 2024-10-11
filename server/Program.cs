@@ -279,7 +279,7 @@ public class DurangoPortal
                 }
             case ("/app/cert", "POST"):
                 {
-                    string certPath = GetTempFilePath(".cer");
+                    string certPath = GetTempFilePath(".p7x");
                     using (FileStream? fs = new FileStream(certPath, FileMode.Create, FileAccess.Write))
                     {
                         await request.InputStream.CopyToAsync(fs);

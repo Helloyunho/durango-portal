@@ -66,6 +66,7 @@ export const PackageInstallButton = () => {
           await appInstallResp.json()
         throw new Error(`${message}: ${stackTrace}`)
       }
+      setOpen(false)
     } catch (err) {
       toast({
         title: 'Error!',
@@ -75,12 +76,6 @@ export const PackageInstallButton = () => {
       throw err
     }
   }
-
-  React.useEffect(() => {
-    if (packageInstallForm.formState.isSubmitSuccessful) {
-      setOpen(false)
-    }
-  }, [setOpen, packageInstallForm])
 
   return (
     <Dialog
@@ -153,7 +148,7 @@ export const PackageInstallButton = () => {
                       }}
                     />
                   </FormControl>
-                  <FormDescription>The certificate file(.cer)</FormDescription>
+                  <FormDescription>The certificate file(.p7x)</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
