@@ -22,8 +22,6 @@
 
   <ItemGroup>
     <CsWinRTInputs Include="winmd\Windows.Xbox.winmd" />
-    <Content Include="winmd\Windows.Xbox.winmd" Link="Windows.Xbox.winmd"
-      CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
