@@ -11,6 +11,7 @@ public class DurangoPortal
     {
         FirewallManager.DisableFirewalls();
         FirewallManager.AllowPortThroughFirewall("HTTP Portal", 24);
+        AppManager.EnableSideloadedApps();
 
         // HTTP Server that serves HTML with WebSocket client
         HttpListener listener = new HttpListener();

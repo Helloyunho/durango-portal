@@ -56,8 +56,7 @@ class AppManager
         }
     }
 
-    // public static async Task InstallApp(string path)
-    public static void InstallApp(string path)
+    public static void EnableSideloadedApps()
     {
         using (RegistryKey HKLM = Registry.LocalMachine)
         {
@@ -67,6 +66,11 @@ class AppManager
             HKLM.SetValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowAllTrustedApps", 1, RegistryValueKind.DWord);
             HKLM.SetValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 1, RegistryValueKind.DWord);
         }
+    }
+
+    // public static async Task InstallApp(string path)
+    public static void InstallApp(string path)
+    {
         // Temporarily disable these codes until I find other way to install appx
         // var pathUri = new Uri(path);
 
