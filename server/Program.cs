@@ -247,7 +247,8 @@ public class DurangoPortal
                         }
                         try
                         {
-                            await AppManager.InstallApp(file);
+                            // await AppManager.InstallApp(file);
+                            AppManager.InstallApp(file);
                             responseString = string.Empty;
                             responseStatus = 204;
                         }

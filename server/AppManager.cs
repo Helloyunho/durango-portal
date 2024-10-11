@@ -40,7 +40,8 @@ class AppManager
         }
     }
 
-    public static async Task InstallApp(string path)
+    // public static async Task InstallApp(string path)
+    public static void InstallApp(string path)
     {
         using (RegistryKey HKLM = Registry.LocalMachine)
         {
@@ -48,8 +49,23 @@ class AppManager
             HKLM.SetValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
             HKLM.SetValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 4, RegistryValueKind.DWord);
         }
-        var pathUri = new Uri(path);
+        // Temporarily disable these codes until I find other way to install appx
+        // var pathUri = new Uri(path);
 
-        await packageManager.AddPackageAsync(pathUri, null, DeploymentOptions.None).AsTask();
+        // await packageManager.AddPackageAsync(pathUri, null, DeploymentOptions.None).AsTask();
+
+        using (Process process = new Process())
+        {
+            process.StartInfo.FileName = "MinDeployAppx.exe";
+            process.StartInfo.Arguments = $"/Add /PackagePath:\"{path}\"";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.Start();
+            process.WaitForExit();
+            if (process.ExitCode != 0)
+            {
+                throw new Exception($"Failed to install app: {process.ExitCode}");
+            }
+        }
     }
 }
