@@ -27,7 +27,7 @@ class AppManager
 
     public static async Task RemoveApp(string package)
     {
-        await packageManager.RemovePackageAsync(package);
+        await packageManager.RemovePackageAsync(package).AsTask();
     }
 
     public static void InstallCert(string path)
