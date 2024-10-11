@@ -99,6 +99,14 @@ public class DurangoPortal
         return JsonSerializer.Serialize<T>(obj, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
     }
 
+    private static string GetTempFilePath(string extension)
+    {
+        string tempPath = Path.GetTempPath();
+        string fileName = Path.GetRandomFileName();
+        string filePath = Path.Combine(tempPath, fileName + extension);
+        return filePath;
+    }
+
     private static async Task HandleApiRequest(string urlPath, HttpListenerRequest request, HttpListenerResponse response)
     {
         int responseStatus = 200;
@@ -238,26 +246,30 @@ public class DurangoPortal
                 }
             case ("/app", "POST"):
                 {
-                    using (var tempFiles = new TempFileCollection())
+                    string filePath = GetTempFilePath(".appx");
+                    using (FileStream? fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                     {
-                        string file = tempFiles.AddExtension("eappx");
-                        using (FileStream? fs = new FileStream(file, FileMode.Create, FileAccess.Write))
+                        await request.InputStream.CopyToAsync(fs);
+                    }
+                    try
+                    {
+                        // await AppManager.InstallApp(file);
+                        AppManager.InstallApp(filePath);
+                        responseString = string.Empty;
+                        responseStatus = 204;
+                    }
+                    catch (Exception e)
+                    {
+                        ErrorContainer error = new ErrorContainer(e);
+                        Console.WriteLine(e.ToString());
+                        responseString = SerializeToJson(error);
+                        responseStatus = 500;
+                    }
+                    finally
+                    {
+                        if (File.Exists(filePath))
                         {
-                            await request.InputStream.CopyToAsync(fs);
-                        }
-                        try
-                        {
-                            // await AppManager.InstallApp(file);
-                            AppManager.InstallApp(file);
-                            responseString = string.Empty;
-                            responseStatus = 204;
-                        }
-                        catch (Exception e)
-                        {
-                            ErrorContainer error = new ErrorContainer(e);
-                            Console.WriteLine(e.ToString());
-                            responseString = SerializeToJson(error);
-                            responseStatus = 500;
+                            File.Delete(filePath);
                         }
                     }
                     break;
