@@ -56,15 +56,29 @@ class AppManager
         }
     }
 
+    public static void SetRegistryValue(string key, object value, RegistryValueKind kind)
+    {
+        string[] keys = key.Split('\\');
+        using (RegistryKey HKLM = Registry.LocalMachine)
+        {
+            RegistryKey currentKey = HKLM;
+            foreach (string k in keys[..^1])
+            {
+                currentKey = currentKey.CreateSubKey(k);
+            }
+            currentKey.SetValue(keys[^1], value, kind);
+        }
+    }
+
     public static void EnableSideloadedApps()
     {
         using (RegistryKey HKLM = Registry.LocalMachine)
         {
-            HKLM.SetValue(@"SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
-            HKLM.SetValue(@"SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock\AllowAllTrustedApps", 1, RegistryValueKind.DWord);
-            HKLM.SetValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
-            HKLM.SetValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowAllTrustedApps", 1, RegistryValueKind.DWord);
-            HKLM.SetValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 1, RegistryValueKind.DWord);
+            SetRegistryValue(@"SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
+            SetRegistryValue(@"SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock\AllowAllTrustedApps", 1, RegistryValueKind.DWord);
+            SetRegistryValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowDevelopmentWithoutDevLicense", 1, RegistryValueKind.DWord);
+            SetRegistryValue(@"SOFTWARE\Policies\Microsoft\Windows\Appx\AllowAllTrustedApps", 1, RegistryValueKind.DWord);
+            SetRegistryValue(@"OSDATA\SOFTWARE\Microsoft\SecurityManager\InternalDevUnlock", 1, RegistryValueKind.DWord);
         }
     }
 
