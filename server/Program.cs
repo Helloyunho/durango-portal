@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
 using DurangoInteropDotnet;
-using System.CodeDom.Compiler;
 using System.Text;
 
 public class DurangoPortal
@@ -206,8 +205,14 @@ public class DurangoPortal
                 }
             case ("/app", "GET"):
                 {
-                    var apps = AppManager.GetInstalledApps();
+                    var apps = AppManager.ListInstalledApps().ToArray();
                     responseString = SerializeToJson(apps);
+                    break;
+                }
+            case ("/license", "GET"):
+                {
+                    var licenses = LicenseManager.ListLicenses().ToArray();
+                    responseString = SerializeToJson(licenses);
                     break;
                 }
             case ("/app", "DELETE"):

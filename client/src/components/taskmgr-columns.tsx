@@ -101,7 +101,7 @@ export const taskMgrColumns: ColumnDef<Process>[] = [
       </Button>
     ),
     meta: {
-      name: 'Name'
+      name: 'Process Name'
     }
   },
   {

@@ -1,3 +1,4 @@
+import React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal, Trash, X, ArrowUp, ArrowDown } from 'lucide-react'
 
@@ -7,7 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  // DropdownMenuSeparator,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import {
@@ -18,13 +19,13 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
+  AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 // import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from '@/hooks/use-toast'
 import type { ErrorContainer } from '@/types/error'
 import type { Package } from '@/types/package'
+import type { License } from '@/types/license'
 
 const removePackage = async (id: string) => {
   try {
@@ -42,7 +43,7 @@ const removePackage = async (id: string) => {
   }
 }
 
-export const packageColumns: ColumnDef<Package>[] = [
+export const packageColumns: ColumnDef<Partial<License> & Package>[] = [
   // {
   //   id: 'select',
   //   header: ({ table }) => (
@@ -107,27 +108,21 @@ export const packageColumns: ColumnDef<Package>[] = [
   {
     accessorKey: 'publisher',
     header: ({ column }) => (
-      <div className='flex justify-end'>
-        <Button
-          variant='ghost'
-          onClick={() =>
-            column.toggleSorting(
-              !column.getIsSorted() ? true : column.getIsSorted() === 'asc'
-            )
-          }
-          className='text-right'
-        >
-          Publisher
-          {column.getIsSorted() === 'asc' ? (
-            <ArrowUp className='h-4 w-4 ml-2' />
-          ) : column.getIsSorted() === 'desc' ? (
-            <ArrowDown className='h-4 w-4 ml-2' />
-          ) : null}
-        </Button>
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className='text-right'>{row.getValue('publisher')}</div>
+      <Button
+        variant='ghost'
+        onClick={() =>
+          column.toggleSorting(
+            !column.getIsSorted() ? true : column.getIsSorted() === 'asc'
+          )
+        }
+      >
+        Publisher
+        {column.getIsSorted() === 'asc' ? (
+          <ArrowUp className='h-4 w-4 ml-2' />
+        ) : column.getIsSorted() === 'desc' ? (
+          <ArrowDown className='h-4 w-4 ml-2' />
+        ) : null}
+      </Button>
     ),
     meta: {
       name: 'Publisher'
@@ -138,50 +133,61 @@ export const packageColumns: ColumnDef<Package>[] = [
     enableHiding: false,
     header: () => <div className='sr-only'>Actions</div>,
     cell: ({ row }) => {
+      // seems like this is a react hook component
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const [alertOpen, setAlertOpen] = React.useState(false)
       const id = row.getValue('id') as string
       const name = row.getValue('name') as string
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0'>
-              <span className='sr-only'>Open menu</span>
-              <MoreHorizontal className='h-4 w-4' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem className='text-destructive hover:text-destructive/90'>
-                  <Trash className='h-4 w-4' /> Remove
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will remove package{' '}
-                    {name} (ID: {id}).
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>
-                    <X className='w-4 h-4 mr-2' />
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => removePackage(id)}
-                    className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                  >
-                    <Trash className='w-4 h-4 mr-2' />
-                    Remove
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' className='h-8 w-8 p-0'>
+                <span className='sr-only'>Open menu</span>
+                <MoreHorizontal className='h-4 w-4' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              {(row.getValue('license') as string) && (
+                <>
+                  <DropdownMenuItem>Download License</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem
+                className='text-destructive hover:text-destructive/90'
+                onClick={() => setAlertOpen(true)}
+              >
+                <Trash className='h-4 w-4 mr-2' /> Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will remove {name}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>
+                  <X className='w-4 h-4 mr-2' />
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => removePackage(id)}
+                  className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                >
+                  <Trash className='w-4 h-4 mr-2' />
+                  Remove
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       )
     }
   }

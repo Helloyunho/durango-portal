@@ -7,9 +7,9 @@ class AppManager
 {
     private static PackageManager packageManager = new PackageManager();
 
-    public static PackageContainer[] GetInstalledApps()
+    public static IEnumerable<PackageContainer> ListInstalledApps()
     {
-        return packageManager.FindPackages().Select(package => new PackageContainer(package)).ToArray();
+        return packageManager.FindPackages().Select(package => new PackageContainer(package));
     }
 
     // public static async Task RemoveApp(string package)

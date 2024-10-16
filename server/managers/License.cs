@@ -42,26 +42,13 @@ class LicenseManager
                             Guid keyID = Guid.Parse(keyIDString);
                             using (SqliteCommand keyIDQueryCommand = connection.CreateCommand())
                             {
-                                keyIDQueryCommand.CommandText = "SELECT Package FROM main.XboxPackage WHERE EscrowedKeyBlobId = $keyID LIMIT 1";
-                                keyIDQueryCommand.Parameters.AddWithValue("$keyID", keyID.ToString("N"));
-                                string? package = (string?)keyIDQueryCommand.ExecuteScalar();
-                                if (string.IsNullOrEmpty(package))
+                                keyIDQueryCommand.CommandText = "SELECT PackageFullName, DisplayName, PublisherDisplayName FROM Package JOIN XboxPackage ON XboxPackage.Package = Package._PackageID WHERE XboxPackage.EscrowedKeyBlobId = $keyID LIMIT 1";
+                                keyIDQueryCommand.Parameters.AddWithValue("$keyID", keyID.ToByteArray());
+                                using (SqliteDataReader reader = keyIDQueryCommand.ExecuteReader())
                                 {
-                                    throw new Exception($"Package not found for key ID {keyID}");
-                                }
-                                else
-                                {
-                                    using (SqliteCommand packageQueryCommand = connection.CreateCommand())
+                                    if (reader.Read())
                                     {
-                                        packageQueryCommand.CommandText = "SELECT (PackageFullName, DisplayName, PublisherDisplayName) FROM main.XboxPackage WHERE _PackageID = $pkgID LIMIT 1";
-                                        packageQueryCommand.Parameters.AddWithValue("$pkgID", package);
-                                        using (SqliteDataReader reader = packageQueryCommand.ExecuteReader())
-                                        {
-                                            if (reader.Read())
-                                            {
-                                                yield return new LicenseContainer(licenseID.ToString(), reader.GetString(0), reader.GetString(1), reader.GetString(2));
-                                            }
-                                        }
+                                        yield return new LicenseContainer(licenseID.ToString(), reader.GetString(0), reader.GetString(1), reader.GetString(2));
                                     }
                                 }
                             }
@@ -99,6 +86,7 @@ class LicenseManager
 
     public static void BackupLicense(string licenseID, string backupDir)
     {
+        Guid licenseGuid = Guid.Parse(licenseID);
         if (!Directory.Exists(backupDir))
         {
             Directory.CreateDirectory(backupDir);
@@ -106,7 +94,7 @@ class LicenseManager
 
         if (Directory.Exists(Path.Combine(ClipDrive, "clip")))
         {
-            string[] files = Directory.GetFiles("S:\\", $"{licenseID}.*", SearchOption.TopDirectoryOnly);
+            string[] files = Directory.GetFiles("S:\\", $"{licenseGuid}.*", SearchOption.TopDirectoryOnly);
             foreach (string file in files)
             {
                 string fileName = Path.GetFileName(file);
