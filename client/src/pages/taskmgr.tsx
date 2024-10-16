@@ -1,32 +1,10 @@
-import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from '@/components/ui/alert-dialog'
-
-import { useToast } from '@/hooks/use-toast'
+import { Loader2 } from 'lucide-react'
 import { useSWRFetcher } from '@/lib/swr-fetcher'
 import type { Process } from '@/types/process'
-import { Loader2, X, LogOut } from 'lucide-react'
-import type { ErrorContainer } from '@/types/error'
+import { DataTable } from '@/components/data-table'
+import { taskMgrColumns } from '@/components/taskmgr-columns'
 
 export const TaskMgr = () => {
-  const { toast } = useToast()
   const { isLoading, data, error } = useSWRFetcher<Process[]>(
     '/api/process',
     undefined,
@@ -35,22 +13,6 @@ export const TaskMgr = () => {
     }
   )
 
-  const kill = async (pid: number) => {
-    try {
-      const resp = await fetch(`/api/process?id=${pid}`, { method: 'DELETE' })
-      if (!resp.ok) {
-        const { message, stackTrace }: ErrorContainer = await resp.json()
-        throw new Error(`${message}: ${stackTrace}`)
-      }
-    } catch (err) {
-      toast({
-        title: 'Error!',
-        description: `Failed to kill process: ${err}`,
-        variant: 'destructive'
-      })
-    }
-  }
-
   return (
     <>
       {isLoading ? (
@@ -58,67 +20,17 @@ export const TaskMgr = () => {
       ) : error ? null : (
         <>
           <h2 className='text-3xl font-semibold'>Task Manager</h2>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className='w-[100px]'>ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className='text-right'>Mem (MB)</TableHead>
-                <TableHead className='text-right'>Status</TableHead>
-                <TableHead className='text-right'>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data
-                ?.sort((a, b) => a.id - b.id)
-                .map(({ id, name, memory, responding }) => (
-                  <TableRow key={id}>
-                    <TableCell className='font-medium'>{id}</TableCell>
-                    <TableCell>{name}</TableCell>
-                    <TableCell className='text-right'>
-                      {(memory / 1024 / 1024).toFixed(2)}
-                    </TableCell>
-                    <TableCell className='text-right'>
-                      {responding ? 'Running' : 'Not Responding'}
-                    </TableCell>
-                    <TableCell className='text-right'>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant='destructive' size='icon'>
-                            <LogOut className='h-4 w-4' />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Are you absolutely sure?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will kill{' '}
-                              {name}
-                              (pid: {id}).
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>
-                              <X className='w-4 h-4 mr-2' />
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => kill(id)}
-                              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                            >
-                              <LogOut className='w-4 h-4 mr-2' />
-                              Kill
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={taskMgrColumns}
+            data={data!}
+            filterPlaceholder='Search processes... (ID, Name)'
+            filterFn={(row, _, filterValue) =>
+              (row.getValue('id') as number).toString().includes(filterValue) ||
+              (row.getValue('name') as string)
+                .toLowerCase()
+                .includes(filterValue.toLowerCase())
+            }
+          />
         </>
       )}
     </>

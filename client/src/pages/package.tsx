@@ -1,33 +1,11 @@
-import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from '@/components/ui/alert-dialog'
-
-import { useToast } from '@/hooks/use-toast'
 import { useSWRFetcher } from '@/lib/swr-fetcher'
-import { Loader2, Trash, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import type { Package } from '@/types/package'
 import { PackageInstallButton } from '@/components/pkg-install-button'
-import type { ErrorContainer } from '@/types/error'
+import { DataTable } from '@/components/data-table'
+import { packageColumns } from '@/components/package-columns'
 
 export const PackageManagement = () => {
-  const { toast } = useToast()
   const { isLoading, data, error } = useSWRFetcher<Package[]>(
     '/api/app',
     undefined,
@@ -35,22 +13,6 @@ export const PackageManagement = () => {
       refreshInterval: 10000
     }
   )
-
-  const removeApp = async (id: string) => {
-    try {
-      const resp = await fetch(`/api/app?id=${id}`, { method: 'DELETE' })
-      if (!resp.ok) {
-        const { message, stackTrace }: ErrorContainer = await resp.json()
-        throw new Error(`${message}: ${stackTrace}`)
-      }
-    } catch (err) {
-      toast({
-        title: 'Error!',
-        description: `Failed to remove package: ${err}`,
-        variant: 'destructive'
-      })
-    }
-  }
 
   return (
     <>
@@ -62,7 +24,23 @@ export const PackageManagement = () => {
             <h2 className='text-3xl font-semibold'>Package Management</h2>
             <PackageInstallButton />
           </div>
-          <Table>
+          <DataTable
+            columns={packageColumns}
+            data={data!}
+            filterPlaceholder='Search packages... (ID, Name, Publisher)'
+            filterFn={(row, _, filterValue) =>
+              (row.getValue('id') as string)
+                .toLowerCase()
+                .includes(filterValue.toLowerCase()) ||
+              (row.getValue('name') as string)
+                .toLowerCase()
+                .includes(filterValue.toLowerCase()) ||
+              (row.getValue('publisher') as string)
+                .toLowerCase()
+                .includes(filterValue.toLowerCase())
+            }
+          />
+          {/* <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className='w-[100px]'>ID</TableHead>
@@ -117,7 +95,7 @@ export const PackageManagement = () => {
                   </TableRow>
                 ))}
             </TableBody>
-          </Table>
+          </Table> */}
         </>
       )}
     </>

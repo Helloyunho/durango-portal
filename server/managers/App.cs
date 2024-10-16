@@ -1,20 +1,7 @@
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32;
-using Windows.ApplicationModel;
 using Windows.Management.Deployment;
-
-class PackageContainer
-{
-    public string Name { get; set; }
-    public string Id { get; set; }
-
-    public PackageContainer(Package package)
-    {
-        Name = package.DisplayName;
-        Id = package.Id.FullName;
-    }
-}
 
 class AppManager
 {

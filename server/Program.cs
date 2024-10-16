@@ -100,17 +100,6 @@ public class DurangoPortal
         return JsonSerializer.Serialize<T>(obj, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
     }
 
-    private static string GetTempFilePath(string extension)
-    {
-        string tempDir = Path.Combine(AppContext.BaseDirectory, "tmp");
-        if (!Directory.Exists(tempDir))
-        {
-            Directory.CreateDirectory(tempDir);
-        }
-        string fileName = Path.GetRandomFileName() + extension;
-        return Path.Combine(tempDir, fileName);
-    }
-
     private static async Task HandleApiRequest(string urlPath, HttpListenerRequest request, HttpListenerResponse response)
     {
         int responseStatus = 200;
@@ -251,59 +240,51 @@ public class DurangoPortal
                 }
             case ("/app", "POST"):
                 {
-                    string filePath = GetTempFilePath(".appx");
-                    using (FileStream? fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                    using (TempManager temp = new TempManager())
                     {
-                        await request.InputStream.CopyToAsync(fs);
-                    }
-                    try
-                    {
-                        // await AppManager.InstallApp(filePath);
-                        AppManager.InstallApp(filePath);
-                        responseString = string.Empty;
-                        responseStatus = 204;
-                    }
-                    catch (Exception e)
-                    {
-                        ErrorContainer error = new ErrorContainer(e);
-                        Console.WriteLine(e.ToString());
-                        responseString = SerializeToJson(error);
-                        responseStatus = 500;
-                    }
-                    finally
-                    {
-                        if (File.Exists(filePath))
+                        string filePath = temp.GetTempFilePath(".appx");
+                        using (FileStream? fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                         {
-                            File.Delete(filePath);
+                            await request.InputStream.CopyToAsync(fs);
+                        }
+                        try
+                        {
+                            // await AppManager.InstallApp(filePath);
+                            AppManager.InstallApp(filePath);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        catch (Exception e)
+                        {
+                            ErrorContainer error = new ErrorContainer(e);
+                            Console.WriteLine(e.ToString());
+                            responseString = SerializeToJson(error);
+                            responseStatus = 500;
                         }
                     }
                     break;
                 }
             case ("/app/cert", "POST"):
                 {
-                    string certPath = GetTempFilePath(".p7x");
-                    using (FileStream? fs = new FileStream(certPath, FileMode.Create, FileAccess.Write))
+                    using (TempManager temp = new TempManager())
                     {
-                        await request.InputStream.CopyToAsync(fs);
-                    }
-                    try
-                    {
-                        AppManager.InstallCert(certPath);
-                        responseString = string.Empty;
-                        responseStatus = 204;
-                    }
-                    catch (Exception e)
-                    {
-                        ErrorContainer error = new ErrorContainer(e);
-                        Console.WriteLine(e.ToString());
-                        responseString = SerializeToJson(error);
-                        responseStatus = 500;
-                    }
-                    finally
-                    {
-                        if (File.Exists(certPath))
+                        string certPath = temp.GetTempFilePath(".p7x");
+                        using (FileStream? fs = new FileStream(certPath, FileMode.Create, FileAccess.Write))
                         {
-                            File.Delete(certPath);
+                            await request.InputStream.CopyToAsync(fs);
+                        }
+                        try
+                        {
+                            AppManager.InstallCert(certPath);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        catch (Exception e)
+                        {
+                            ErrorContainer error = new ErrorContainer(e);
+                            Console.WriteLine(e.ToString());
+                            responseString = SerializeToJson(error);
+                            responseStatus = 500;
                         }
                     }
                     break;
