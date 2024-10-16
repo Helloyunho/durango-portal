@@ -9,15 +9,15 @@ class LicenseManager
     static string LicenseDir = Path.Combine(ClipDrive, "clip");
     static string LicenseDB = Path.Combine(ClipDrive, "ProgramData", "Microsoft", "Windows", "AppRepository", "StateRepository-Machine.srd");
 
-    public static LicenseContainer[] ListLicenses()
+    public static IEnumerable<LicenseContainer> ListLicenses()
     {
-        LicenseContainer[] licenses = [];
         if (Directory.Exists(LicenseDir) && File.Exists(LicenseDB))
         {
             using (SqliteConnection connection = new SqliteConnection($"Data Source={LicenseDB}"))
             {
                 connection.Open();
-                foreach (string file in Directory.GetFiles(LicenseDir, "*.*", SearchOption.TopDirectoryOnly))
+                var files = Directory.GetFiles(LicenseDir, "*.*", SearchOption.TopDirectoryOnly);
+                foreach (string file in files)
                 {
                     Guid licenseID = Guid.Parse(Path.GetFileNameWithoutExtension(file));
                     XmlDocument licenseXML = new XmlDocument();
@@ -49,7 +49,7 @@ class LicenseManager
                                 {
                                     if (reader.Read())
                                     {
-                                        licenses.Append(new LicenseContainer(licenseID.ToString(), reader.GetString(0), reader.GetString(1), reader.GetString(2)));
+                                        yield return new LicenseContainer(licenseID.ToString(), reader.GetString(0), reader.GetString(1), reader.GetString(2));
                                     }
                                 }
                             }
@@ -58,8 +58,6 @@ class LicenseManager
                 }
             }
         }
-
-        return licenses;
     }
 
     public static void BackupLicenses(string backupDir)
