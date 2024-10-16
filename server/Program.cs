@@ -109,90 +109,83 @@ public class DurangoPortal
         }
 
         string responseString;
-        switch ((url, request.HttpMethod))
+        try
         {
-            case ("/power/shutdown", "POST"):
-                {
-                    try
+            switch ((url, request.HttpMethod))
+            {
+                case ("/power/shutdown", "POST"):
                     {
                         PowerManager.Shutdown();
                         responseString = string.Empty;
                         responseStatus = 204;
+                        break;
                     }
-                    catch (Exception e)
-                    {
-                        ErrorContainer error = new ErrorContainer(e);
-                        Console.WriteLine(e.ToString());
-                        responseString = SerializeToJson(error);
-                        responseStatus = 500;
-                    }
-                    break;
-                }
-            case ("/power/reboot", "POST"):
-                {
-                    try
+                case ("/power/reboot", "POST"):
                     {
                         PowerManager.Reboot();
                         responseString = string.Empty;
                         responseStatus = 204;
+                        break;
                     }
-                    catch (Exception e)
+                case ("/bluescreen", "POST"):
+                    BluescreenManager.ShowBluescreen();
+                    responseString = string.Empty;
+                    responseStatus = 204;
+                    break;
+                case ("/process", "GET"):
                     {
-                        ErrorContainer error = new ErrorContainer(e);
-                        Console.WriteLine(e.ToString());
-                        responseString = SerializeToJson(error);
-                        responseStatus = 500;
+                        var processes = ProcessManager.GetProcesses();
+                        responseString = SerializeToJson(processes);
+                        break;
                     }
-                    break;
-                }
-            case ("/bluescreen", "POST"):
-                BluescreenManager.ShowBluescreen();
-                responseString = string.Empty;
-                responseStatus = 204;
-                break;
-            case ("/process", "GET"):
-                {
-                    var processes = ProcessManager.GetProcesses();
-                    responseString = SerializeToJson(processes);
-                    break;
-                }
-            case ("/process", "DELETE"):
-                {
-                    string? id = request.QueryString["id"];
-                    if (int.TryParse(id, out int processId))
+                case ("/process", "DELETE"):
                     {
-                        try
+                        string? id = request.QueryString["id"];
+                        if (int.TryParse(id, out int processId))
                         {
                             ProcessManager.KillProcess(processId);
                             responseString = string.Empty;
                             responseStatus = 204;
                         }
-                        catch (Exception e)
+                        else
                         {
-                            ErrorContainer error = new ErrorContainer(e);
-                            Console.WriteLine(e.ToString());
-                            responseString = SerializeToJson(error);
-                            responseStatus = 500;
-                        }
-                    }
-                    else
-                    {
-                        string? name = request.QueryString["name"];
-                        if (!string.IsNullOrEmpty(name))
-                        {
-                            try
+                            string? name = request.QueryString["name"];
+                            if (!string.IsNullOrEmpty(name))
                             {
                                 ProcessManager.KillProcess(name);
                                 responseString = string.Empty;
                                 responseStatus = 204;
                             }
-                            catch (Exception e)
+                            else
                             {
-                                ErrorContainer error = new ErrorContainer(e);
-                                Console.WriteLine(e.ToString());
+                                ErrorContainer error = new ErrorContainer("Invalid request");
                                 responseString = SerializeToJson(error);
-                                responseStatus = 500;
+                                responseStatus = 400;
                             }
+                        }
+                        break;
+                    }
+                case ("/app", "GET"):
+                    {
+                        var apps = AppManager.ListInstalledApps().ToArray();
+                        responseString = SerializeToJson(apps);
+                        break;
+                    }
+                case ("/license", "GET"):
+                    {
+                        var licenses = LicenseManager.ListLicenses().ToArray();
+                        responseString = SerializeToJson(licenses);
+                        break;
+                    }
+                case ("/app", "DELETE"):
+                    {
+                        string? id = request.QueryString["id"];
+                        if (!string.IsNullOrEmpty(id))
+                        {
+                            // await AppManager.RemoveApp(id);
+                            AppManager.RemoveApp(id);
+                            responseString = string.Empty;
+                            responseStatus = 204;
                         }
                         else
                         {
@@ -200,107 +193,54 @@ public class DurangoPortal
                             responseString = SerializeToJson(error);
                             responseStatus = 400;
                         }
+                        break;
                     }
-                    break;
-                }
-            case ("/app", "GET"):
-                {
-                    var apps = AppManager.ListInstalledApps().ToArray();
-                    responseString = SerializeToJson(apps);
-                    break;
-                }
-            case ("/license", "GET"):
-                {
-                    var licenses = LicenseManager.ListLicenses().ToArray();
-                    responseString = SerializeToJson(licenses);
-                    break;
-                }
-            case ("/app", "DELETE"):
-                {
-                    string? id = request.QueryString["id"];
-                    if (!string.IsNullOrEmpty(id))
+                case ("/app", "POST"):
                     {
-                        try
+                        using (TempManager temp = new TempManager())
                         {
-                            // await AppManager.RemoveApp(id);
-                            AppManager.RemoveApp(id);
-                            responseString = string.Empty;
-                            responseStatus = 204;
-                        }
-                        catch (Exception e)
-                        {
-                            ErrorContainer error = new ErrorContainer(e);
-                            Console.WriteLine(e.ToString());
-                            responseString = SerializeToJson(error);
-                            responseStatus = 500;
-                        }
-                    }
-                    else
-                    {
-                        ErrorContainer error = new ErrorContainer("Invalid request");
-                        responseString = SerializeToJson(error);
-                        responseStatus = 400;
-                    }
-                    break;
-                }
-            case ("/app", "POST"):
-                {
-                    using (TempManager temp = new TempManager())
-                    {
-                        string filePath = temp.GetTempFilePath(".appx");
-                        using (FileStream? fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                        {
-                            await request.InputStream.CopyToAsync(fs);
-                        }
-                        try
-                        {
+                            string filePath = temp.GetTempFilePath(".appx");
+                            using (FileStream? fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                            {
+                                await request.InputStream.CopyToAsync(fs);
+                            }
                             // await AppManager.InstallApp(filePath);
                             AppManager.InstallApp(filePath);
                             responseString = string.Empty;
                             responseStatus = 204;
                         }
-                        catch (Exception e)
-                        {
-                            ErrorContainer error = new ErrorContainer(e);
-                            Console.WriteLine(e.ToString());
-                            responseString = SerializeToJson(error);
-                            responseStatus = 500;
-                        }
+                        break;
                     }
-                    break;
-                }
-            case ("/app/cert", "POST"):
-                {
-                    using (TempManager temp = new TempManager())
+                case ("/app/cert", "POST"):
                     {
-                        string certPath = temp.GetTempFilePath(".p7x");
-                        using (FileStream? fs = new FileStream(certPath, FileMode.Create, FileAccess.Write))
+                        using (TempManager temp = new TempManager())
                         {
-                            await request.InputStream.CopyToAsync(fs);
-                        }
-                        try
-                        {
+                            string certPath = temp.GetTempFilePath(".p7x");
+                            using (FileStream? fs = new FileStream(certPath, FileMode.Create, FileAccess.Write))
+                            {
+                                await request.InputStream.CopyToAsync(fs);
+                            }
                             AppManager.InstallCert(certPath);
                             responseString = string.Empty;
                             responseStatus = 204;
                         }
-                        catch (Exception e)
-                        {
-                            ErrorContainer error = new ErrorContainer(e);
-                            Console.WriteLine(e.ToString());
-                            responseString = SerializeToJson(error);
-                            responseStatus = 500;
-                        }
+                        break;
                     }
-                    break;
-                }
-            default:
-                {
-                    ErrorContainer error = new ErrorContainer("Not Found");
-                    responseString = SerializeToJson(error);
-                    responseStatus = 404;
-                    break;
-                }
+                default:
+                    {
+                        ErrorContainer error = new ErrorContainer("Not Found");
+                        responseString = SerializeToJson(error);
+                        responseStatus = 404;
+                        break;
+                    }
+            }
+        }
+        catch (Exception e)
+        {
+            ErrorContainer error = new ErrorContainer(e);
+            Console.WriteLine(e.ToString());
+            responseString = SerializeToJson(error);
+            responseStatus = 500;
         }
 
         byte[] buffer = Encoding.UTF8.GetBytes(responseString);
