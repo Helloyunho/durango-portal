@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster'
 import './index.css'
 import { Index } from './pages'
 import { PackageManagement } from './pages/package'
+import { RegistryManager } from './pages/registry'
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: 'package',
         element: <PackageManagement />
+      },
+      {
+        path: 'registry',
+        element: <RegistryManager />
       }
     ]
   }

@@ -2,6 +2,7 @@
 using System.Text.Json;
 using DurangoInteropDotnet;
 using System.Text;
+using System.Web;
 
 public class DurangoPortal
 {
@@ -223,6 +224,113 @@ public class DurangoPortal
                             AppManager.InstallCert(certPath);
                             responseString = string.Empty;
                             responseStatus = 204;
+                        }
+                        break;
+                    }
+                case ("/registry/key", "GET"):
+                    {
+                        string? keyRaw = request.QueryString["key"];
+                        string? key = HttpUtility.UrlDecode(keyRaw);
+                        if (!string.IsNullOrEmpty(key))
+                        {
+                            var subkeys = RegistryManager.GetSubKeys(key);
+                            responseString = SerializeToJson(subkeys);
+                        }
+                        else
+                        {
+                            ErrorContainer error = new ErrorContainer("Invalid request");
+                            responseString = SerializeToJson(error);
+                            responseStatus = 400;
+                        }
+                        break;
+                    }
+                case ("/registry/key", "POST"):
+                    {
+                        string? keyRaw = request.QueryString["key"];
+                        string? key = HttpUtility.UrlDecode(keyRaw);
+                        if (!string.IsNullOrEmpty(key))
+                        {
+                            RegistryManager.CreateKey(key);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        else
+                        {
+                            ErrorContainer error = new ErrorContainer("Invalid request");
+                            responseString = SerializeToJson(error);
+                            responseStatus = 400;
+                        }
+                        break;
+                    }
+                case ("/registry/key", "DELETE"):
+                    {
+                        string? keyRaw = request.QueryString["key"];
+                        string? key = HttpUtility.UrlDecode(keyRaw);
+                        if (!string.IsNullOrEmpty(key))
+                        {
+                            RegistryManager.DeleteKey(key);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        else
+                        {
+                            ErrorContainer error = new ErrorContainer("Invalid request");
+                            responseString = SerializeToJson(error);
+                            responseStatus = 400;
+                        }
+                        break;
+                    }
+                case ("/registry/value", "GET"):
+                    {
+                        string? keyRaw = request.QueryString["key"];
+                        string? key = HttpUtility.UrlDecode(keyRaw);
+                        if (!string.IsNullOrEmpty(key))
+                        {
+                            var value = RegistryManager.GetValue(key);
+                            responseString = SerializeToJson(value);
+                        }
+                        else
+                        {
+                            ErrorContainer error = new ErrorContainer("Invalid request");
+                            responseString = SerializeToJson(error);
+                            responseStatus = 400;
+                        }
+                        break;
+                    }
+                case ("/registry/value", "POST"):
+                    {
+                        string? keyRaw = request.QueryString["key"];
+                        string? key = HttpUtility.UrlDecode(keyRaw);
+                        RegistryValueContainer? value = await ReadJsonAsync<RegistryValueContainer>(request);
+                        if (value != null && !string.IsNullOrEmpty(key))
+                        {
+                            RegistryManager.SetValue($"{key}\\{value.Key}", value.Value, value.Kind);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        else
+                        {
+                            ErrorContainer error = new ErrorContainer("Invalid request");
+                            responseString = SerializeToJson(error);
+                            responseStatus = 400;
+                        }
+                        break;
+                    }
+                case ("/registry/value", "DELETE"):
+                    {
+                        string? keyRaw = request.QueryString["key"];
+                        string? key = HttpUtility.UrlDecode(keyRaw);
+                        if (!string.IsNullOrEmpty(key))
+                        {
+                            RegistryManager.DeleteValue(key);
+                            responseString = string.Empty;
+                            responseStatus = 204;
+                        }
+                        else
+                        {
+                            ErrorContainer error = new ErrorContainer("Invalid request");
+                            responseString = SerializeToJson(error);
+                            responseStatus = 400;
                         }
                         break;
                     }

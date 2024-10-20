@@ -8,7 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
+  // DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import {
@@ -150,12 +150,12 @@ export const packageColumns: ColumnDef<Partial<License> & Package>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {(row.getValue('license') as string) && (
+              {/* {(row.getValue('license') as string) && (
                 <>
                   <DropdownMenuItem>Download License</DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
-              )}
+              )} */}
               <DropdownMenuItem
                 className='text-destructive hover:text-destructive/90'
                 onClick={() => setAlertOpen(true)}

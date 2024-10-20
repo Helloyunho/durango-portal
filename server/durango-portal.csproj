@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Interop\src\DurangoInteropDotnet.csproj" />
+    <ProjectReference Include="..\Silverton\Silverton.csproj" />
   </ItemGroup>
 
 </Project>

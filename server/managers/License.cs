@@ -16,7 +16,7 @@ class LicenseManager
             using (SqliteConnection connection = new SqliteConnection($"Data Source={LicenseDB}"))
             {
                 connection.Open();
-                var files = Directory.GetFiles(LicenseDir, "*.*", SearchOption.TopDirectoryOnly);
+                var files = Directory.GetFiles(LicenseDir, "*", SearchOption.TopDirectoryOnly);
                 foreach (string file in files)
                 {
                     Guid licenseID = Guid.Parse(Path.GetFileNameWithoutExtension(file));
@@ -69,7 +69,7 @@ class LicenseManager
 
         if (Directory.Exists(Path.Combine(ClipDrive, "clip")))
         {
-            string[] files = Directory.GetFiles("S:\\", "*.*", SearchOption.TopDirectoryOnly);
+            string[] files = Directory.GetFiles("S:\\", "*", SearchOption.TopDirectoryOnly);
             foreach (string file in files)
             {
                 string fileName = Path.GetFileName(file);
@@ -95,7 +95,7 @@ class LicenseManager
 
         if (Directory.Exists(Path.Combine(ClipDrive, "clip")))
         {
-            string[] files = Directory.GetFiles("S:\\", $"{licenseGuid}.*", SearchOption.TopDirectoryOnly);
+            string[] files = Directory.GetFiles("S:\\", $"{licenseGuid}*", SearchOption.TopDirectoryOnly);
             foreach (string file in files)
             {
                 string fileName = Path.GetFileName(file);

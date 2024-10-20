@@ -1,3 +1,6 @@
 [submodule "Interop"]
 	path = Interop
 	url = https://github.com/xboxoneresearch/Interop.git
+[submodule "Silverton"]
+	path = Silverton
+	url = https://github.com/kwsimons/Silverton
