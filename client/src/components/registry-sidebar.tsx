@@ -23,6 +23,10 @@ import type { Registry } from '@/types/registry'
 import { useToast } from '@/hooks/use-toast'
 import type { ErrorContainer } from '@/types/error'
 
+const isArrayEqual = (a: string[], b: string[]) => {
+  return a.length === b.length && a.every((value, index) => value === b[index])
+}
+
 export const RegistrySidebar = ({
   selected,
   onClick
@@ -56,37 +60,36 @@ export const RegistrySidebar = ({
     values: []
   })
   const { toast } = useToast()
+  React.useEffect(() => {
+    console.log(data)
+  }, [data])
 
   const onLoadClick = async (trace: string[]) => {
     try {
       const query = trace.join('\\')
       const encodedQuery = encodeURIComponent(query)
 
-      const resp = await fetch(`/api/registry/subkey?key=${encodedQuery}`)
+      const resp = await fetch(`/api/registry/key?key=${encodedQuery}`)
       if (!resp.ok) {
         const { message, stackTrace }: ErrorContainer = await resp.json()
         throw new Error(`${message}: ${stackTrace}`)
       }
 
-      const data: string[] = await resp.json()
-      setData((prev) => {
-        const newData = trace.reduce((acc, key, index) => {
-          if (index === trace.length - 1) {
-            const keys: Registry = acc.keys![key]
-            data.forEach((item) => {
-              keys.keys![item] = {
-                keys: null,
-                values: []
-              }
-            })
-            acc.keys![key] = keys
-          }
+      const keys: string[] = await resp.json()
+      const _data = data
+      const newData = trace.reduce((acc, key) => {
+        return acc.keys![key]
+      }, _data)
 
-          return acc.keys![key]
-        }, prev)
-
-        return { ...prev, ...newData }
+      newData.keys = {}
+      keys.forEach((item) => {
+        newData.keys![item] = {
+          keys: null,
+          values: []
+        }
       })
+
+      setData(_data)
     } catch (err) {
       toast({
         title: 'Error!',
@@ -112,7 +115,7 @@ export const RegistrySidebar = ({
                     selected={selected}
                     trace={[key]}
                     onClick={onClick}
-                    onLoadClick={() => onLoadClick([key])}
+                    onLoadClick={onLoadClick}
                   />
                 ))}
               </SidebarMenu>
@@ -144,7 +147,7 @@ const Tree = ({
     return (
       <SidebarMenuItem>
         <SidebarMenuButton
-          isActive={selected.every((key, index) => key === trace[index])}
+          isActive={isArrayEqual(selected, trace)}
           onClick={() => onClick(trace)}
         >
           {name}
@@ -157,10 +160,10 @@ const Tree = ({
     )
   }
 
-  if (!keys.length) {
+  if (!Object.keys(keys).length) {
     return (
       <SidebarMenuButton
-        isActive={selected.every((key, index) => key === trace[index])}
+        isActive={isArrayEqual(selected, trace)}
         onClick={() => onClick(trace)}
       >
         {name}
@@ -172,7 +175,7 @@ const Tree = ({
     <SidebarMenuItem>
       <Collapsible className='group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90'>
         <SidebarMenuButton
-          isActive={selected.every((key, index) => key === trace[index])}
+          isActive={isArrayEqual(selected, trace)}
           onClick={() => onClick(trace)}
         >
           {name}
