@@ -28,7 +28,8 @@ class LicenseManager
                     string? signedLicenseBase64 = licenseXML.SelectSingleNode("/LicenseRequestResponse/License/SignedLicense")?.InnerText;
                     if (string.IsNullOrEmpty(signedLicenseBase64))
                     {
-                        throw new Exception("Invalid license file (missing SignedLicense)");
+                        Console.WriteLine($"Invalid license file ${file} (missing SignedLicense), skipping...");
+                        continue;
                     }
                     else
                     {
