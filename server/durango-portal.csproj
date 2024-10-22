@@ -25,11 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DirectPInvoke Include="sqlite3" />
-    <NativeLibrary Include=".\sqlite3.dll" />
-    <Content Include=".\sqlite3.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="../client/dist/**">
       <TargetPath>public/%(RecursiveDir)/%(Filename)%(Extension)</TargetPath>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -44,7 +39,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.10" />
     <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.1.5" />
-    <PackageReference Include="SQLitePCLRaw.provider.sqlite3" Version="2.1.10" />
+    <PackageReference Include="SQLitePCLRaw.provider.winsqlite3" Version="2.1.10" />
     <PackageReference Include="System.CodeDom" Version="8.0.0" />
   </ItemGroup>
 
