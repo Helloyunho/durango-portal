@@ -1,6 +1,7 @@
 using System.Text;
 using System.Xml;
 using Microsoft.Data.Sqlite;
+using SQLitePCL;
 
 class LicenseManager
 {
@@ -15,6 +16,7 @@ class LicenseManager
         {
             using (SqliteConnection connection = new SqliteConnection($"Data Source={LicenseDB}"))
             {
+                raw.SetProvider(new SQLite3Provider_sqlite3());
                 connection.Open();
                 var files = Directory.GetFiles(LicenseDir, "*", SearchOption.TopDirectoryOnly);
                 foreach (string file in files)

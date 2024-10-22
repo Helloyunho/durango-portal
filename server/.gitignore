@@ -1,3 +1,4 @@
 bin
 obj
 winmd/*
+sqlite3.dll
