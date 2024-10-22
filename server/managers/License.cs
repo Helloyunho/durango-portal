@@ -16,7 +16,7 @@ class LicenseManager
         {
             using (SqliteConnection connection = new SqliteConnection($"Data Source={LicenseDB}"))
             {
-                raw.SetProvider(new SQLite3Provider_sqlite3());
+                raw.SetProvider(new SQLite3Provider_winsqlite3());
                 connection.Open();
                 var files = Directory.GetFiles(LicenseDir, "*", SearchOption.TopDirectoryOnly);
                 foreach (string file in files)
