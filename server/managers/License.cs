@@ -21,11 +21,16 @@ class LicenseManager
                 var files = Directory.GetFiles(LicenseDir, "*", SearchOption.TopDirectoryOnly);
                 foreach (string file in files)
                 {
-                    Guid licenseID = Guid.Parse(Path.GetFileNameWithoutExtension(file));
+                    Guid licenseID;
+                    if (!Guid.TryParse(Path.GetFileNameWithoutExtension(file), out licenseID))
+                    {
+                        Console.WriteLine($"Invalid license file ${file} (invalid GUID), skipping...");
+                        continue;
+                    }
                     XmlDocument licenseXML = new XmlDocument();
                     licenseXML.Load(file);
 
-                    string? signedLicenseBase64 = licenseXML.SelectSingleNode("/LicenseRequestResponse/License/SignedLicense")?.InnerText;
+                    string? signedLicenseBase64 = licenseXML.SelectSingleNode("/License/SignedLicense")?.InnerText;
                     if (string.IsNullOrEmpty(signedLicenseBase64))
                     {
                         Console.WriteLine($"Invalid license file ${file} (missing SignedLicense), skipping...");
@@ -36,7 +41,7 @@ class LicenseManager
                         XmlDocument signedLicenseXML = new XmlDocument();
                         signedLicenseXML.LoadXml(Encoding.UTF8.GetString(Convert.FromBase64String(signedLicenseBase64)));
 
-                        string? keyIDString = signedLicenseXML.SelectSingleNode("/SignedLicense/SVLicense/KeyID")?.InnerText;
+                        string? keyIDString = signedLicenseXML.SelectSingleNode("/SignedLicense/SVLicense/KeyId")?.InnerText;
                         if (string.IsNullOrEmpty(keyIDString))
                         {
                             throw new Exception("Invalid license file (missing KeyID)");
