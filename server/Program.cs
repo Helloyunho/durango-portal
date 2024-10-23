@@ -306,7 +306,7 @@ public class DurangoPortal
                         string? key = HttpUtility.UrlDecode(keyRaw);
                         if (!string.IsNullOrEmpty(key))
                         {
-                            var value = RegistryManager.GetValue(key);
+                            var value = RegistryManager.GetValues(key);
                             responseString = SerializeToJson(value);
                         }
                         else
