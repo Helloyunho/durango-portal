@@ -33,7 +33,7 @@ class LicenseManager
                     XmlDocument licenseXML = new XmlDocument();
                     licenseXML.Load(licenseXMLReader);
 
-                    string? signedLicenseBase64 = licenseXML.DocumentElement!.SelectSingleNode("/SignedLicense")?.InnerText;
+                    string? signedLicenseBase64 = licenseXML.DocumentElement!.SelectSingleNode("/License/SignedLicense")?.InnerText;
                     if (string.IsNullOrEmpty(signedLicenseBase64))
                     {
                         Console.WriteLine($"Invalid license file {file} (missing SignedLicense), skipping...");
