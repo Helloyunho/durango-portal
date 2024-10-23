@@ -1,6 +1,13 @@
 import React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, Trash, X, ArrowUp, ArrowDown } from 'lucide-react'
+import {
+  MoreHorizontal,
+  Trash,
+  X,
+  ArrowUp,
+  ArrowDown,
+  Download
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -8,7 +15,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  // DropdownMenuSeparator,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import {
@@ -38,6 +45,31 @@ const removePackage = async (id: string) => {
     toast({
       title: 'Error!',
       description: `Failed to remove package: ${err}`,
+      variant: 'destructive'
+    })
+  }
+}
+
+const downloadLicense = async (id: string) => {
+  try {
+    const resp = await fetch(`/api/license?id=${id}`)
+    if (!resp.ok) {
+      const { message, stackTrace }: ErrorContainer = await resp.json()
+      throw new Error(`${message}: ${stackTrace}`)
+    }
+
+    const blob = await resp.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${id}`
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    toast({
+      title: 'Error!',
+      description: `Failed to download license: ${err}`,
       variant: 'destructive'
     })
   }
@@ -150,12 +182,17 @@ export const packageColumns: ColumnDef<Partial<License> & Package>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {/* {(row.getValue('license') as string) && (
+              {row.original.licenseID && (
                 <>
-                  <DropdownMenuItem>Download License</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => downloadLicense(row.original.licenseID!)}
+                  >
+                    <Download className='h-4 w-4 mr-2' />
+                    Download License
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
-              )} */}
+              )}
               <DropdownMenuItem
                 className='text-destructive hover:text-destructive/90'
                 onClick={() => setAlertOpen(true)}

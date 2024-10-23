@@ -4,7 +4,7 @@ import { PackageInstallButton } from '@/components/pkg-install-button'
 import { DataTable } from '@/components/data-table'
 import { packageColumns } from '@/components/package-columns'
 import type { Package } from '@/types/package'
-// import type { License } from '@/types/license'
+import type { License } from '@/types/license'
 
 export const PackageManagement = () => {
   const {
@@ -14,21 +14,19 @@ export const PackageManagement = () => {
   } = useSWRFetcher<Package[]>('/api/app', undefined, {
     refreshInterval: 10000
   })
-  // const {
-  //   isLoading: licenseIsLoading,
-  //   data: licenseData,
-  //   error: licenseError
-  // } = useSWRFetcher<License[]>('/api/license', undefined, {
-  //   refreshInterval: 10000
-  // })
+  const {
+    isLoading: licenseIsLoading,
+    data: licenseData,
+    error: licenseError
+  } = useSWRFetcher<License[]>('/api/license', undefined, {
+    refreshInterval: 10000
+  })
 
   return (
     <>
-      {/* {appIsLoading || licenseIsLoading ? ( */}
-      {appIsLoading ? (
+      {appIsLoading || licenseIsLoading ? (
         <Loader2 className='animate-spin h-8 w-8' />
-      ) : // ) : appError || licenseError ? null : (
-      appError ? null : (
+      ) : appError || licenseError ? null : (
         <>
           <div className='flex justify-between w-full'>
             <h2 className='text-3xl font-semibold'>Package Management</h2>
@@ -38,12 +36,12 @@ export const PackageManagement = () => {
             columns={packageColumns}
             data={
               appData?.map((app) => {
-                // const license = licenseData?.find(
-                //   (license) => license.packageId === app.id
-                // )
+                const license = licenseData?.find(
+                  (license) => license.packageID === app.id
+                )
                 return {
-                  ...app
-                  // licenseId: license?.licenseId
+                  ...app,
+                  licenseID: license?.licenseID
                 }
               }) ?? []
             }

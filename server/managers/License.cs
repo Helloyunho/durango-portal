@@ -124,4 +124,15 @@ class LicenseManager
             }
         }
     }
+
+    public static string? ReadLicense(string licenseID)
+    {
+        Guid licenseGuid = Guid.Parse(licenseID);
+        string licenseFile = Path.Combine(ClipDrive, "clip", $"{licenseGuid}");
+        if (File.Exists(licenseFile))
+        {
+            return File.ReadAllText(licenseFile);
+        }
+        return null;
+    }
 }

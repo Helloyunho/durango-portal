@@ -1,6 +1,6 @@
 export interface License {
-  licenseId: string
-  packageId: string
+  licenseID: string
+  packageID: string
   name: string
   publisher: string
 }

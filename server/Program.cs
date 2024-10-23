@@ -103,6 +103,7 @@ public class DurangoPortal
     private static async Task HandleApiRequest(string urlPath, HttpListenerRequest request, HttpListenerResponse response)
     {
         int responseStatus = 200;
+        string contentType = "application/json";
         string url = urlPath[3..];
         if (url.EndsWith('/'))
         {
@@ -174,8 +175,27 @@ public class DurangoPortal
                     }
                 case ("/license", "GET"):
                     {
-                        var licenses = LicenseManager.ListLicenses().ToArray();
-                        responseString = SerializeToJson(licenses);
+                        string? id = request.QueryString["id"];
+                        if (string.IsNullOrEmpty(id))
+                        {
+                            var licenses = LicenseManager.ListLicenses().ToArray();
+                            responseString = SerializeToJson(licenses);
+                        }
+                        else
+                        {
+                            string? license = LicenseManager.ReadLicense(id);
+                            if (license != null)
+                            {
+                                responseString = license;
+                                contentType = "text/xml";
+                            }
+                            else
+                            {
+                                ErrorContainer error = new ErrorContainer("License not found");
+                                responseString = SerializeToJson(error);
+                                responseStatus = 404;
+                            }
+                        }
                         break;
                     }
                 case ("/app", "DELETE"):
@@ -358,7 +378,7 @@ public class DurangoPortal
         }
         else
         {
-            response.ContentType = "application/json";
+            response.ContentType = contentType;
             response.ContentLength64 = buffer.Length;
         }
         response.StatusCode = responseStatus;
