@@ -1,3 +1,4 @@
+import React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal, LogOut, X, ArrowUp, ArrowDown } from 'lucide-react'
 
@@ -18,8 +19,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
+  AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 // import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from '@/hooks/use-toast'
@@ -152,50 +152,56 @@ export const taskMgrColumns: ColumnDef<Process>[] = [
     enableHiding: false,
     header: () => <div className='sr-only'>Actions</div>,
     cell: ({ row }) => {
+      // seems like this is a react hook component
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const [alertOpen, setAlertOpen] = React.useState(false)
       const id = row.getValue('id') as number
       const name = row.getValue('name') as string
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0'>
-              <span className='sr-only'>Open menu</span>
-              <MoreHorizontal className='h-4 w-4' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem className='text-destructive hover:text-destructive/90'>
-                  <LogOut className='h-4 w-4 mr-2' /> Kill
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will kill {name}
-                    (PID: {id}).
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>
-                    <X className='w-4 h-4 mr-2' />
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => kill(id)}
-                    className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                  >
-                    <LogOut className='w-4 h-4 mr-2' />
-                    Kill
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' className='h-8 w-8 p-0'>
+                <span className='sr-only'>Open menu</span>
+                <MoreHorizontal className='h-4 w-4' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                className='text-destructive hover:text-destructive/90'
+                onClick={() => setAlertOpen(true)}
+              >
+                <LogOut className='h-4 w-4 mr-2' /> Kill
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will kill {name} (PID: {id}
+                  ).
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>
+                  <X className='w-4 h-4 mr-2' />
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => kill(id)}
+                  className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                >
+                  <LogOut className='w-4 h-4 mr-2' />
+                  Kill
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       )
     }
   }

@@ -139,7 +139,7 @@ public class RegistryManager
                 .GetValueNames()
                 .Select(
                     name => new RegistryValueContainer(
-                        key,
+                        name,
                         currentKey.GetValue(name)!,
                         currentKey.GetValueKind(name)
                     )

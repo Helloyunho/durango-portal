@@ -27,38 +27,34 @@ export const PackageManagement = () => {
       {appIsLoading || licenseIsLoading ? (
         <Loader2 className='animate-spin h-8 w-8' />
       ) : appError || licenseError ? null : (
-        <>
-          <div className='flex justify-between w-full'>
-            <h2 className='text-3xl font-semibold'>Package Management</h2>
-            <PackageInstallButton />
-          </div>
-          <DataTable
-            columns={packageColumns}
-            data={
-              appData?.map((app) => {
-                const license = licenseData?.find(
-                  (license) => license.packageID === app.id
-                )
-                return {
-                  ...app,
-                  licenseID: license?.licenseID
-                }
-              }) ?? []
-            }
-            filterPlaceholder='Search packages... (ID, Name, Publisher)'
-            filterFn={(row, _, filterValue) =>
-              (row.getValue('id') as string)
-                .toLowerCase()
-                .includes(filterValue.toLowerCase()) ||
-              (row.getValue('name') as string)
-                .toLowerCase()
-                .includes(filterValue.toLowerCase()) ||
-              (row.getValue('publisher') as string)
-                .toLowerCase()
-                .includes(filterValue.toLowerCase())
-            }
-          />
-        </>
+        <DataTable
+          columns={packageColumns}
+          data={
+            appData?.map((app) => {
+              const license = licenseData?.find(
+                (license) => license.packageID === app.id
+              )
+              return {
+                ...app,
+                licenseID: license?.licenseID
+              }
+            }) ?? []
+          }
+          filterPlaceholder='Search packages... (ID, Name, Publisher)'
+          filterFn={(row, _, filterValue) =>
+            (row.getValue('id') as string)
+              .toLowerCase()
+              .includes(filterValue.toLowerCase()) ||
+            (row.getValue('name') as string)
+              .toLowerCase()
+              .includes(filterValue.toLowerCase()) ||
+            (row.getValue('publisher') as string)
+              .toLowerCase()
+              .includes(filterValue.toLowerCase())
+          }
+        >
+          <PackageInstallButton />
+        </DataTable>
       )}
     </>
   )

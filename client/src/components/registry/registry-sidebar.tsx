@@ -16,8 +16,7 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarProvider
+  SidebarMenuSub
 } from '@/components/ui/sidebar'
 import type { Registry } from '@/types/registry'
 import { useToast } from '@/hooks/use-toast'
@@ -35,34 +34,13 @@ export const RegistrySidebar = ({
   onClick: (trace: string[]) => void
 }) => {
   const [data, setData] = React.useState<Registry>({
-    keys: {
-      HKEY_CLASSES_ROOT: {
-        keys: null,
-        values: []
-      },
-      HKEY_CURRENT_USER: {
-        keys: null,
-        values: []
-      },
-      HKEY_LOCAL_MACHINE: {
-        keys: null,
-        values: []
-      },
-      HKEY_USERS: {
-        keys: null,
-        values: []
-      },
-      HKEY_CURRENT_CONFIG: {
-        keys: null,
-        values: []
-      }
-    },
-    values: []
+    HKEY_CLASSES_ROOT: null,
+    HKEY_CURRENT_USER: null,
+    HKEY_LOCAL_MACHINE: null,
+    HKEY_USERS: null,
+    HKEY_CURRENT_CONFIG: null
   })
   const { toast } = useToast()
-  React.useEffect(() => {
-    console.log(data)
-  }, [data])
 
   const onLoadClick = async (trace: string[]) => {
     try {
@@ -76,17 +54,16 @@ export const RegistrySidebar = ({
       }
 
       const keys: string[] = await resp.json()
-      const _data = data
+      const _data = { ...data }
       const newData = trace.reduce((acc, key) => {
-        return acc.keys![key]
+        if (!acc[key]) {
+          acc[key] = {}
+        }
+        return acc[key]!
       }, _data)
 
-      newData.keys = {}
       keys.forEach((item) => {
-        newData.keys![item] = {
-          keys: null,
-          values: []
-        }
+        newData[item] = null
       })
 
       setData(_data)
@@ -101,29 +78,27 @@ export const RegistrySidebar = ({
   }
 
   return (
-    <SidebarProvider>
-      <Sidebar className='relative' collapsible='none'>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Keys</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {Object.keys(data.keys!).map((key, index) => (
-                  <Tree
-                    key={index}
-                    item={data.keys![key]}
-                    selected={selected}
-                    trace={[key]}
-                    onClick={onClick}
-                    onLoadClick={onLoadClick}
-                  />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
-    </SidebarProvider>
+    <Sidebar className='relative' collapsible='none'>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Keys</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {Object.keys(data).map((key, index) => (
+                <Tree
+                  key={index}
+                  item={data[key]}
+                  selected={selected}
+                  trace={[key]}
+                  onClick={onClick}
+                  onLoadClick={onLoadClick}
+                />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   )
 }
 
@@ -134,16 +109,15 @@ const Tree = ({
   onClick,
   onLoadClick
 }: {
-  item: Registry
+  item: Registry | null
   selected: string[]
   trace: string[]
   onClick: (trace: string[]) => void
   onLoadClick: (trace: string[]) => void
 }) => {
-  const { keys } = item
   const name = trace[trace.length - 1]
 
-  if (!keys) {
+  if (!item) {
     return (
       <SidebarMenuItem>
         <SidebarMenuButton
@@ -160,7 +134,7 @@ const Tree = ({
     )
   }
 
-  if (!Object.keys(keys).length) {
+  if (!Object.keys(item).length) {
     return (
       <SidebarMenuButton
         isActive={isArrayEqual(selected, trace)}
@@ -188,10 +162,10 @@ const Tree = ({
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>
-            {Object.keys(keys).map((subItem, index) => (
+            {Object.keys(item).map((subItem, index) => (
               <Tree
                 key={index}
-                item={keys[subItem]}
+                item={item[subItem]}
                 selected={selected}
                 trace={[...trace, subItem]}
                 onClick={onClick}

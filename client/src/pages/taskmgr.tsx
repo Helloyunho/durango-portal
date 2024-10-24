@@ -25,7 +25,9 @@ export const TaskMgr = () => {
             data={data!}
             filterPlaceholder='Search processes... (ID, Name)'
             filterFn={(row, _, filterValue) =>
-              (row.getValue('id') as number).toString().includes(filterValue) ||
+              (row.getValue('id') as number)
+                .toString()
+                .includes(filterValue.toLowerCase()) ||
               (row.getValue('name') as string)
                 .toLowerCase()
                 .includes(filterValue.toLowerCase())

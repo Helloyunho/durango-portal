@@ -46,8 +46,11 @@ export const DataTable = <TData, TValue>({
   columns,
   data,
   filterFn,
-  filterPlaceholder
-}: DataTableProps<TData, TValue>) => {
+  filterPlaceholder,
+  children
+}: DataTableProps<TData, TValue> & {
+  children?: React.ReactNode
+}) => {
   const [sorting, setSorting] = React.useState<SortingState>([
     {
       id: 'id',
@@ -80,13 +83,12 @@ export const DataTable = <TData, TValue>({
 
   return (
     <div className='w-full'>
-      <div className='flex items-center pb-4'>
+      <div className='flex items-center pb-4 space-x-4'>
         <Input
           placeholder={filterPlaceholder}
           onChange={(event) => {
             table.setGlobalFilter(event.target.value)
           }}
-          className='mr-4'
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -113,6 +115,7 @@ export const DataTable = <TData, TValue>({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
+        {children}
       </div>
       <div className='rounded-md border w-full'>
         <Table>
