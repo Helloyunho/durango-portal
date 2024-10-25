@@ -44,11 +44,11 @@ const base64Regex =
 const registryEditScheme = z
   .object({
     kind: z.nativeEnum(RegistryKind),
-    value: z.string()
+    value: z.string().min(1, 'Value is required.')
   })
   .refine(
     ({ kind, value }) =>
-      kind === RegistryKind.BINARY && value.match(base64Regex),
+      kind === RegistryKind.BINARY ? value.match(base64Regex) : true,
     {
       message: 'Binary value must be base64 encoded.',
       path: ['value']
@@ -56,8 +56,9 @@ const registryEditScheme = z
   )
   .refine(
     ({ kind, value }) =>
-      (kind === RegistryKind.DWORD || kind === RegistryKind.QWORD) &&
-      !isNaN(Number(value)),
+      kind === RegistryKind.DWORD || kind === RegistryKind.QWORD
+        ? !isNaN(Number(value))
+        : true,
     {
       message: 'DWORD or QWORD value must be a number.',
       path: ['value']
@@ -159,7 +160,7 @@ export const RegistryEditDialog = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {[0, 1, 2, 3, 4, 7, 11].map((kind) => (
+                      {[1, 2, 3, 4, 7, 11].map((kind) => (
                         <SelectItem key={kind} value={kind.toString()}>
                           {kindToString(kind as RegistryKind)}
                         </SelectItem>
@@ -243,7 +244,8 @@ export const RegistryEditDialog = ({
                 type='submit'
                 disabled={
                   !registryEditForm.formState.isValid ||
-                  registryEditForm.formState.isSubmitting
+                  registryEditForm.formState.isSubmitting ||
+                  !registryEditForm.formState.isDirty
                 }
               >
                 {registryEditForm.formState.isSubmitting ? (

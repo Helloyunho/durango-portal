@@ -52,6 +52,7 @@ export const RegistryManagerBody = ({ trace }: { trace: string[] }) => {
               .toLowerCase()
               .includes(filterValue.toLowerCase())
           }
+          defaultSortKey='key'
         >
           <RegistryAddValueButton trace={trace} />
         </DataTable>

@@ -38,7 +38,7 @@ const deleteValue = async (trace: string[]) => {
   try {
     const query = trace.join('\\')
     const encodedQuery = encodeURIComponent(query)
-    const resp = await fetch(`/api/registry/value?id=${encodedQuery}`, {
+    const resp = await fetch(`/api/registry/value?key=${encodedQuery}`, {
       method: 'DELETE'
     })
     if (!resp.ok) {

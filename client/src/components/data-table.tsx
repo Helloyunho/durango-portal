@@ -40,6 +40,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   filterPlaceholder: string
   filterFn: (row: Row<TData>, columnId: string, filterValue: string) => boolean
+  defaultSortKey?: keyof TData
 }
 
 export const DataTable = <TData, TValue>({
@@ -47,13 +48,14 @@ export const DataTable = <TData, TValue>({
   data,
   filterFn,
   filterPlaceholder,
+  defaultSortKey,
   children
 }: DataTableProps<TData, TValue> & {
   children?: React.ReactNode
 }) => {
   const [sorting, setSorting] = React.useState<SortingState>([
     {
-      id: 'id',
+      id: defaultSortKey?.toString() ?? 'id',
       desc: false
     }
   ])
