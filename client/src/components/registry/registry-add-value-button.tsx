@@ -67,7 +67,12 @@ export const RegistryAddValueButton = ({ trace }: { trace: string[] }) => {
   const { toast } = useToast()
 
   const registryAddValueForm = useForm<z.infer<typeof registryAddValueScheme>>({
-    resolver: zodResolver(registryAddValueScheme)
+    resolver: zodResolver(registryAddValueScheme),
+    defaultValues: {
+      key: '',
+      kind: RegistryKind.NONE,
+      value: ''
+    }
   })
 
   const addRegistryValue = async (
@@ -75,6 +80,15 @@ export const RegistryAddValueButton = ({ trace }: { trace: string[] }) => {
   ) => {
     try {
       const encodedTrace = encodeURIComponent(trace.join('\\'))
+      let _value: string | number | string[] = data.value
+      if (
+        data.kind === RegistryKind.DWORD ||
+        data.kind === RegistryKind.QWORD
+      ) {
+        _value = Number(data.value)
+      } else if (data.kind === RegistryKind.MULTI_STRING) {
+        _value = data.value.split('\n')
+      }
       const resp = await fetch(`/api/registry/value?key=${encodedTrace}`, {
         method: 'POST',
         headers: {
@@ -83,7 +97,7 @@ export const RegistryAddValueButton = ({ trace }: { trace: string[] }) => {
         body: JSON.stringify({
           key: data.key,
           kind: data.kind,
-          value: data.value
+          value: _value
         })
       })
       if (!resp.ok) {
@@ -146,7 +160,7 @@ export const RegistryAddValueButton = ({ trace }: { trace: string[] }) => {
                 <FormItem>
                   <FormLabel>Kind</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => field.onChange(Number(value))}
                     defaultValue={field.value.toString()}
                   >
                     <FormControl>
@@ -155,7 +169,7 @@ export const RegistryAddValueButton = ({ trace }: { trace: string[] }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.values(RegistryKind).map((kind) => (
+                      {[0, 1, 2, 3, 4, 7, 11].map((kind) => (
                         <SelectItem key={kind} value={kind.toString()}>
                           {kindToString(kind as RegistryKind)}
                         </SelectItem>

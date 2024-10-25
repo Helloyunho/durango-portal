@@ -3,6 +3,7 @@ using System.Text.Json;
 using DurangoInteropDotnet;
 using System.Text;
 using System.Web;
+using Microsoft.Win32;
 
 public class DurangoPortal
 {
@@ -130,10 +131,12 @@ public class DurangoPortal
                         break;
                     }
                 case ("/bluescreen", "POST"):
-                    BluescreenManager.ShowBluescreen();
-                    responseString = string.Empty;
-                    responseStatus = 204;
-                    break;
+                    {
+                        BluescreenManager.ShowBluescreen();
+                        responseString = string.Empty;
+                        responseStatus = 204;
+                        break;
+                    }
                 case ("/process", "GET"):
                     {
                         var processes = ProcessManager.GetProcesses();
@@ -321,10 +324,15 @@ public class DurangoPortal
                     {
                         string? keyRaw = request.QueryString["key"];
                         string? key = HttpUtility.UrlDecode(keyRaw);
-                        RegistryValueContainer? value = await ReadJsonAsync<RegistryValueContainer>(request);
-                        if (value != null && !string.IsNullOrEmpty(key))
+                        RegistryValueContainer? valueContainer = await ReadJsonAsync<RegistryValueContainer>(request);
+                        if (valueContainer != null && !string.IsNullOrEmpty(key))
                         {
-                            RegistryManager.SetValue($"{key}\\{value.Key}", value.Value, value.Kind);
+                            object value = valueContainer.Value;
+                            if (valueContainer.Kind == RegistryValueKind.Binary)
+                            {
+                                value = Convert.FromBase64String((string)value);
+                            }
+                            RegistryManager.SetValue($"{key}\\{valueContainer.Key}", value, valueContainer.Kind);
                             responseString = string.Empty;
                             responseStatus = 204;
                         }

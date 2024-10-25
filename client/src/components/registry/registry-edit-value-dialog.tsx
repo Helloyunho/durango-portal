@@ -88,6 +88,15 @@ export const RegistryEditDialog = ({
   ) => {
     try {
       const encodedTrace = encodeURIComponent(value.trace.join('\\'))
+      let _value: string | number | string[] = data.value
+      if (
+        data.kind === RegistryKind.DWORD ||
+        data.kind === RegistryKind.QWORD
+      ) {
+        _value = Number(data.value)
+      } else if (data.kind === RegistryKind.MULTI_STRING) {
+        _value = data.value.split('\n')
+      }
       const resp = await fetch(`/api/registry/value?key=${encodedTrace}`, {
         method: 'POST',
         headers: {
@@ -96,7 +105,7 @@ export const RegistryEditDialog = ({
         body: JSON.stringify({
           key: value.key,
           kind: data.kind,
-          value: data.value
+          value: _value
         })
       })
       if (!resp.ok) {
@@ -115,7 +124,15 @@ export const RegistryEditDialog = ({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          registryEditForm.reset()
+        }
+        onOpenChange(open)
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Registry</DialogTitle>
@@ -133,7 +150,7 @@ export const RegistryEditDialog = ({
                 <FormItem>
                   <FormLabel>Kind</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => field.onChange(Number(value))}
                     defaultValue={field.value.toString()}
                   >
                     <FormControl>
@@ -142,7 +159,7 @@ export const RegistryEditDialog = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.values(RegistryKind).map((kind) => (
+                      {[0, 1, 2, 3, 4, 7, 11].map((kind) => (
                         <SelectItem key={kind} value={kind.toString()}>
                           {kindToString(kind as RegistryKind)}
                         </SelectItem>
